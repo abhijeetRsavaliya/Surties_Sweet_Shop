@@ -44,9 +44,33 @@
             height: 100%;
             background: rgba(0,0,0,0.4);
         }
+        .product-card {
+            border: 2px solid #2f3542;  /* Black border for all products */
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+            height: 100%;
+            position: relative;
+        }
+        .product-card.discounted {
+            border: 2px solid #ff4757;  /* Red border for discounted items */
+        }
         .product-card:hover {
             transform: translateY(-5px);
-            transition: transform 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .discount-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4757;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            font-weight: bold;
+            z-index: 1;
         }
         .footer {
             background-color: #f8f9fa;
@@ -1364,6 +1388,34 @@
                 slides[currentSlide].classList.add('active');
             }, 3000); // Changed to 3000ms (3 seconds)
         }
+
+        function loadSweets() {
+            fetch('/api/sweets')
+                .then(response => response.json())
+                .then(sweets => {
+                    const sweetsList = document.getElementById('sweetsList');
+                    sweetsList.innerHTML = sweets.map(sweet => `
+                        <div class="col-md-4 mb-4">
+                            <div class="product-card ${sweet.discount?.isActive ? 'discounted' : ''}">
+                                <div class="position-relative">
+                                    <img src="${sweet.image}" alt="${sweet.name}" class="card-img-top">
+                                    ${sweet.discount?.isActive ? `
+                                        <div class="discount-badge">
+                                            ${sweet.discount.percentage}% OFF
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <!-- Rest of the product card content -->
+                                <div class="p-3">
+                                    <h5>${sweet.name}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSweets);
     </script>
 </body>
 </html>
