@@ -68,9 +68,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use(express.static('public'));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 
-// Configure session middleware with more secure settings
+// Update session configuration with secure settings
 app.use(session({
-    secret: 'your-secret-key',
+    secret: 'admin-secret-key-123',  // Change this to a strong secret
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -80,13 +80,52 @@ app.use(session({
     }
 }));
 
-// Add auth check endpoint
-app.get('/admin-auth-check', (req, res) => {
+// Add auth check middleware
+const adminAuth = (req, res, next) => {
     if (req.session && req.session.isAdminAuthenticated) {
+        next();
+    } else {
+        res.redirect('/admin-login');
+    }
+};
+
+// Add auth check endpoint
+app.get('/check-admin-auth', (req, res) => {
+    if (req.session && req.session.isAdminAuthenticated) {
+        res.json({ authenticated: true });
+    } else {
+        res.json({ authenticated: false });
+    }
+});
+
+// Update admin authentication endpoint
+app.post('/admin-auth', express.json(), (req, res) => {
+    const { adminId, adminPass } = req.body;
+    console.log('Admin auth attempt:', { adminId, adminPass }); // Debug log
+
+    if (adminId === 'admin' && adminPass === 'admin@#123') {
+        req.session.isAdminAuthenticated = true;
         res.json({ success: true });
     } else {
-        res.status(401).json({ success: false });
+        res.status(401).json({ 
+            success: false, 
+            error: 'Invalid credentials'
+        });
     }
+});
+
+// Update admin routes
+app.get('/admin-login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
+});
+
+app.get('/admin', adminAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/admin-logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/admin-login');
 });
 
 // Configure multer for image upload
@@ -113,39 +152,6 @@ const upload = multer({
             cb(new Error('Not an image! Please upload an image.'));
         }
     }
-});
-
-// Update admin authentication middleware
-const adminAuth = (req, res, next) => {
-    if (req.session && req.session.isAdminAuthenticated) {
-        next();
-    } else {
-        res.redirect('/admin-login');
-    }
-};
-
-// Update admin routes
-app.get('/admin-login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
-});
-
-app.post('/admin-auth', express.json(), (req, res) => {
-    const { adminId, adminPass } = req.body;
-    if (adminId === 'admin' && adminPass === 'admin@#123') {
-        req.session.isAdminAuthenticated = true;
-        res.json({ success: true });
-    } else {
-        res.status(401).json({ success: false, error: 'Invalid credentials' });
-    }
-});
-
-app.get('/admin', adminAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-app.get('/admin-logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/admin-login');
 });
 
 app.post('/api/sweets', adminAuth, upload.single('image'), async (req, res) => {
