@@ -45,7 +45,7 @@
             background: rgba(0,0,0,0.4);
         }
         .product-card {
-            border: 2px solid #2f3542;  /* Black border for all products */
+            border: 2px solid #2f3542;  /* Black border for all items */
             border-radius: 15px;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -1390,29 +1390,27 @@
         }
 
         function loadSweets() {
-            fetch('/api/sweets')
-                .then(response => response.json())
-                .then(sweets => {
-                    const sweetsList = document.getElementById('sweetsList');
-                    sweetsList.innerHTML = sweets.map(sweet => `
-                        <div class="col-md-4 mb-4">
-                            <div class="product-card ${sweet.discount?.isActive ? 'discounted' : ''}">
-                                <div class="position-relative">
-                                    <img src="${sweet.image}" alt="${sweet.name}" class="card-img-top">
-                                    ${sweet.discount?.isActive ? `
-                                        <div class="discount-badge">
-                                            ${sweet.discount.percentage}% OFF
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <!-- Rest of the product card content -->
-                                <div class="p-3">
-                                    <h5>${sweet.name}</h5>
-                                </div>
+            const sweetsList = document.getElementById('sweetsList');
+            const sweets = [
+                // Example sweet items
+                { name: 'Kaju Katli', discount: { isActive: true, percentage: 20 } },
+                { name: 'Rasgulla', discount: { isActive: false } },
+                { name: 'Gulab Jamun', discount: { isActive: true, percentage: 15 } }
+            ];
+            sweetsList.innerHTML = sweets.map(sweet => `
+                <div class="col-md-4 mb-4">
+                    <div class="product-card ${sweet.discount?.isActive ? 'discounted' : ''}">
+                        ${sweet.discount?.isActive ? `
+                            <div class="discount-badge">
+                                ${sweet.discount.percentage}% OFF
                             </div>
+                        ` : ''}
+                        <div class="p-3">
+                            <h5>${sweet.name}</h5>
                         </div>
-                    `).join('');
-                });
+                    </div>
+                </div>
+            `).join('');
         }
 
         document.addEventListener('DOMContentLoaded', loadSweets);
