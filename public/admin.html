@@ -764,6 +764,40 @@
                 });
         }
 
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const response = await fetch(`/api/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success message
+                    showNotification('Order status updated successfully', 'success');
+                    
+                    // If order is delivered, reload both active and completed orders
+                    if (newStatus === 'delivered') {
+                        setTimeout(() => {
+                            loadActiveOrders();    // Reload active orders
+                            loadCompletedOrders(); // Reload completed orders
+                        }, 500);
+                    } else {
+                        loadActiveOrders(); // Just reload active orders
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to update status');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showNotification('Failed to update order status', 'error');
+            }
+        }
+
         function loadCompletedOrders() {
             // Show loading state
             document.getElementById('completedOrdersList').innerHTML = `
@@ -834,36 +868,6 @@
                         </tr>
                     `;
                 });
-        }
-
-        async function updateOrderStatus(orderId, newStatus) {
-            try {
-                const response = await fetch(`/api/orders/${orderId}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...getAuthHeaders()
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    // Show success message
-                    showToast('Order status updated successfully', 'success');
-                    
-                    // If order is delivered, move it to completed orders
-                    if (newStatus === 'delivered') {
-                        loadActiveOrders();
-                        loadCompletedOrders();
-                    }
-                } else {
-                    throw new Error(data.error);
-                }
-            } catch (error) {
-                console.error('Error updating status:', error);
-                showToast('Failed to update order status', 'error');
-            }
         }
 
         function confirmDelete(orderId) {

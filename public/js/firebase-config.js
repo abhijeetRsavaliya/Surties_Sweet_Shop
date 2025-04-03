@@ -1,31 +1,26 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyD3xIhY8hk4qWDFYQvUPFNppyI1odkJv98",
-    authDomain: "surties-sweetshop.firebaseapp.com",
-    projectId: "surties-sweetshop",
-    storageBucket: "surties-sweetshop.firebasestorage.app",
-    messagingSenderId: "614102868340",
-    appId: "1:614102868340:web:9240510e74bb44f87f8c21",
-    measurementId: "G-JV8JXS28M8"
+  apiKey: "AIzaSyCRJ0YKArnUOxIChiOkOccA-AdlyHDahaE",
+  authDomain: "surties-40ea2.firebaseapp.com",
+  projectId: "surties-40ea2",
+  storageBucket: "surties-40ea2.firebasestorage.app",
+  messagingSenderId: "992136732465",
+  appId: "1:992136732465:web:84747f6591734234f29a10",
+  measurementId: "G-Y277V3EBYN"
 };
 
+// Initialize Firebase and export required objects
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
 
-// Add auth state observer
-auth.onAuthStateChanged((user) => {
-    if (!user && window.location.pathname !== '/auth.html') {
-        // Check if trying to access checkout
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('showCart') === 'true') {
-            localStorage.setItem('pendingCheckout', 'true');
-            window.location.href = '/auth.html?redirect=checkout';
-        }
-    }
+// Configure Google Provider
+googleProvider.setCustomParameters({
+    prompt: 'select_account'
 });
 
-export { auth, db };
+export { auth, db, googleProvider, GoogleAuthProvider };
