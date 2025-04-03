@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Signup - Surties Sweet Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    <style>
+        /* Add new 3D background styles */
+        .auth-container {
+            min-height: 100vh;
+            background: linear-gradient(45deg, #ff6b6b, #ffa502);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            perspective: 1000px;
+        }
+
+        .auth-container:before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.1) 0px,
+                rgba(255, 255, 255, 0.1) 30px,
+                transparent 30px,
+                transparent 60px
+            );
+            animation: move-background 20s linear infinite;
+            transform: rotateX(45deg);
+        }
+
+        @keyframes move-background {
+            from {
+                transform: translateX(-50%) translateY(-50%) rotateX(45deg);
+            }
+            to {
+                transform: translateX(0%) translateY(0%) rotateX(45deg);
+            }
+        }
+
+        .floating-shapes div {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 10px;
+            animation: float 10s infinite;
+        }
+
+        .floating-shapes div:nth-child(1) {
+            top: 10%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .floating-shapes div:nth-child(2) {
+            top: 70%;
+            right: 20%;
+            animation-delay: 2s;
+        }
+
+        .floating-shapes div:nth-child(3) {
+            top: 40%;
+            left: 80%;
+            animation-delay: 4s;
+        }
+
+        .floating-shapes div:nth-child(4) {
+            top: 80%;
+            left: 10%;
+            animation-delay: 6s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            animation: card-entrance 1s ease-out;
+        }
+
+        @keyframes card-entrance {
+            from {
+                opacity: 0;
+                transform: translateY(20px) rotateX(-10deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
+        }
+
+        .auth-header {
+            text-align: center;
+            padding: 2rem 2rem 1rem;
+        }
+
+        .auth-header img {
+            width: 80px;
+            margin-bottom: 1rem;
+        }
+
+        .auth-header h2 {
+            color: #2d3436;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .auth-header p {
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+
+        .social-buttons {
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fff;
+            border: 1px solid #dfe6e9;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-btn img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            padding: 0 2rem;
+            color: #b2bec3;
+            font-size: 0.9rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        .divider span {
+            padding: 0 1rem;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .auth-input:focus {
+            border-color: #ff6b6b;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8c8c);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .form-footer {
+            text-align: center;
+            padding: 1rem;
+            color: #636e72;
+        }
+
+        .form-footer a {
+            color: #ff6b6b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .tab-switcher {
+            display: flex;
+            padding: 0.5rem;
+            gap: 8px;
+            background: #f1f2f6;
+            margin: 2rem;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Add floating shapes -->
+        <div class="floating-shapes">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        
+        <div class="auth-card animate__animated animate__fadeIn">
+            <div class="auth-header">
+                <img src="https://img.icons8.com/fluency/96/shop.png" alt="Shop Icon">
+                <h2>Create Your Surties Account</h2>
+                <p id="authHeaderText">Get started with a free account</p>
+            </div>
+
+            <div class="social-buttons">
+                <button class="social-btn" onclick="signInWithGoogle()" id="googleBtn">
+                    <img src="https://img.icons8.com/color/48/google-logo.png" alt="Google">
+                    <span>Google</span>
+                </button>
+                <button class="social-btn" onclick="signInWithApple()" id="appleBtn">
+                    <img src="https://img.icons8.com/ios-filled/50/mac-os.png" alt="Apple">
+                    <span>Apple</span>
+                </button>
+            </div>
+
+            <div class="divider">
+                <span>or continue with email</span>
+            </div>
+
+            <div class="tab-content p-4">
+                <div id="signupForm">
+                    <div class="form-group">
+                        <input type="text" class="auth-input" placeholder="Full Name" id="signupName" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="auth-input" placeholder="Email" id="signupEmail" required>
+                    </div>
+                   
+                    <div class="form-group">
+                        <input type="password" class="auth-input" placeholder="Password" id="signupPassword" required>
+                        <small class="text-muted d-block mt-1">Password must be at least 6 characters</small>
+                    </div>
+                    <button class="auth-btn" type="submit" onclick="handleSignup(event)">Create Account</button>
+                    <div class="form-footer">
+                        <p>Already have an account? <a href="#" onclick="toggleForms()"> login</a></p>
+                    </div>
+                </div>
+
+                <div id="loginForm" style="display: none;">
+                    <div class="form-group">
+                        <input type="email" class="auth-input" placeholder="Email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="auth-input" placeholder="Password" id="loginPassword" required>
+                        <div class="text-end">
+                            <a href="#" onclick="showForgotPassword()" class="text-muted small">Forgot Password?</a>
+                        </div>
+                    </div>
+                    <button class="auth-btn" type="submit" onclick="handleLogin(event)">Sign In</button>
+                    <div class="form-footer">
+                        <p>Don't have an account? <a href="#" onclick="toggleForms()">Create account</a></p>
+                    </div>
+                </div>
+
+                <!-- Add Forgot Password Form -->
+                <div id="forgotPasswordForm" style="display: none;">
+                    <h4 class="text-center mb-4">Reset Password</h4>
+                    <p class="text-muted text-center mb-4">Enter your email address to receive a password reset link</p>
+                    <div class="form-group">
+                        <input type="email" class="auth-input" placeholder="Email" id="resetEmail" required>
+                    </div>
+                    <button class="auth-btn" type="submit" onclick="handlePasswordReset(event)">Send Reset Link</button>
+                    <div class="form-footer">
+                        <p>Remember your password? <a href="#" onclick="showLoginForm()">Back to Login</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/firebase-config.js"></script>
+    <script type="module" src="/js/auth.js"></script>
+    <script>
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                window.location.href = '/'; // Redirect to home if already logged in
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Clear only auth state, keep other data
+            localStorage.removeItem('user');
+            
+            // Reset all form fields
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => form.reset());
+            
+            // Show login form for both logout and switch account
+            if (window.location.search.includes('logout=true') || window.location.search.includes('switchAccount=true')) {
+                const loginForm = document.getElementById('loginForm');
+                const signupForm = document.getElementById('signupForm');
+                const headerText = document.getElementById('authHeaderText');
+                const headerTitle = document.querySelector('.auth-header h2');
+                
+                signupForm.style.display = 'none';
+                loginForm.style.display = 'block';
+                headerTitle.textContent = 'Welcome Back!';
+                
+                // Different message for switch account
+                headerText.textContent = window.location.search.includes('switchAccount=true') 
+                    ? 'Login with another account' 
+                    : 'Please login to continue';
+                
+                // Clear the URL parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // Prevent form resubmission
+            window.history.replaceState(null, null, window.location.href);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Clear only auth state on logout/switch account
+            const params = new URLSearchParams(window.location.search);
+            
+            if (params.has('logout') || params.has('switchAccount')) {
+                localStorage.removeItem('user');
+                const loginForm = document.getElementById('loginForm');
+                const signupForm = document.getElementById('signupForm');
+                const headerTitle = document.querySelector('.auth-header h2');
+                const headerText = document.getElementById('authHeaderText');
+                
+                signupForm.style.display = 'none';
+                loginForm.style.display = 'block';
+                headerTitle.textContent = 'Welcome Back!';
+                
+                // Different message for switch account
+                headerText.textContent = params.has('switchAccount') 
+                    ? 'Login with another account' 
+                    : 'Please login to continue';
+                    
+                // Clean URL
+                history.replaceState({}, document.title, '/auth.html');
+            }
+        });
+    </script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode') || 'login';
+    const redirect = params.get('redirect');
+
+    // Set initial form visibility based on mode
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const headerText = document.getElementById('authHeaderText');
+    const headerTitle = document.querySelector('.auth-header h2');
+
+    if (mode === 'login') {
+        signupForm.style.display = 'none';
+        loginForm.style.display = 'block';
+        headerTitle.textContent = 'Welcome Back!';
+        headerText.textContent = 'Please login to continue';
+    } else {
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+        headerTitle.textContent = 'Create Your Account';
+        headerText.textContent = 'Get started with a free account';
+    }
+
+    // Store redirect URL for after login
+    if (redirect) {
+        localStorage.setItem('authRedirect', redirect);
+    }
+});
+
+// Update handleLogin success callback
+window.handleLogin = async (e) => {
+    // ...existing login code...
+
+    // After successful login
+    const redirect = localStorage.getItem('authRedirect') || 'home';
+    localStorage.removeItem('authRedirect');
+    
+    setTimeout(() => {
+        if (redirect === 'home') {
+            window.location.href = '/';
+        } else if (redirect === 'checkout') {
+            window.location.href = '/?showCart=true';
+        } else {
+            window.location.href = `/${redirect}.html`;
+        }
+    }, 1500);
+};
+
+window.showForgotPassword = () => {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('forgotPasswordForm').style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+    document.querySelector('.auth-header h2').textContent = 'Reset Your Password';
+    document.getElementById('authHeaderText').textContent = 'We will send you a password reset link';
+};
+
+window.showLoginForm = () => {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('forgotPasswordForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'none';
+    document.querySelector('.auth-header h2').textContent = 'Welcome Back!';
+    document.getElementById('authHeaderText').textContent = 'Please login to continue';
+};
+</script>
+</body>
+</html>

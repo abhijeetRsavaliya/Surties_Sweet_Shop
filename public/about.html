@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Surties Sweet Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        /* Add new styles */
+        .page-header {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            padding: 100px 0 80px;
+            margin-bottom: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: white;
+            transform: skewY(-3deg);
+        }
+
+        .page-header h1 {
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .page-header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .story-section {
+            padding: 80px 0;
+        }
+
+        .story-image {
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .story-image:hover {
+            transform: translateY(-10px);
+        }
+
+        .story-content {
+            padding: 30px;
+        }
+
+        .story-content h2 {
+            font-family: 'Playfair Display', serif;
+            color: #2d3436;
+            margin-bottom: 25px;
+        }
+
+        .story-content p {
+            color: #636e72;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .owners-section {
+            background: #fff;
+            padding: 100px 0;
+        }
+
+        .owner-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .owner-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(255, 71, 87, 0.2);
+        }
+
+        .owner-image {
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .owner-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .owner-card:hover .owner-image img {
+            transform: scale(1.1);
+        }
+
+        .owner-info {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .owner-info h3 {
+            color: #2d3436;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .owner-info .position {
+            color: #ff4757;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .owner-info .description {
+            color: #636e72;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .social-links a {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #f1f2f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d3436;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: #ff4757;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .values-section {
+            background: #f8f9fa;
+            padding: 80px 0;
+            position: relative;
+        }
+
+        .value-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .value-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .value-icon {
+            width: 70px;
+            height: 70px;
+            background: #ff4757;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.8rem;
+        }
+
+        .stats-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #2d3436, #636e72);
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ff4757;
+            margin-bottom: 10px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+            .stat-number {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Add Navbar Styles */
+        .navbar {
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .logo-icon {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            transform-style: preserve-3d;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff4757;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .brand-slogan {
+            font-size: 12px;
+            color: #2f3542;
+            font-family: 'Dancing Script', cursive;
+            margin-top: -5px;
+        }
+    </style>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand logo-container" href="/">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 512 512">
+                        <path d="M416 256c0 88.4-71.6 160-160 160S96 344.4 96 256s71.6-160 160-160 160 71.6 160 160zm-80-64c0-44.2-35.8-80-80-80s-80 35.8-80 80 35.8 80 80 80 80-35.8 80-80zm-168 64c0-13.3-10.7-24-24-24s-24 10.7-24 24 10.7 24 24 24 24-10.7 24-24zm248 0c0-13.3-10.7-24-24-24s-24 10.7-24 24 10.7 24 24 24 24-10.7 24-24zM256 432c79.4 0 144-64.6 144-144s-64.6-144-144-144-144 64.6-144 144 64.6 144 144 144z"/>
+                        <circle cx="256" cy="256" r="48" fill="#ff4757"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="brand-name">Surties</span>
+                    <span class="brand-slogan">sweetshop</span>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/about.html">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#trackOrderModal">
+                            <i class="bi bi-geo-alt me-1"></i>Track Order
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" id="accountSection">
+                        <a class="nav-link" href="/auth.html" id="loginButton">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Login</span>
+                        </a>
+                        <a class="nav-link dropdown-toggle d-none" href="#" id="userDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                            <span id="userDisplayName"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item login-another" href="#" onclick="handleSignOut(event)">
+                                    <i class="bi bi-person-plus me-2"></i>
+                                    Login with Another Account
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="handleSignOut(event)">
+                                    <i class="bi bi-box-arrow-right me-2"></i>
+                                    Sign Out
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link cart-icon" href="#" onclick="showCart()">
+                            <i class="bi bi-cart3"></i>
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="page-header text-center">
+        <div class="container">
+            <h1 class="animate__animated animate__fadeInDown">Our Sweet Story</h1>
+            <p class="animate__animated animate__fadeInUp animate__delay-1s">
+                Discover the rich heritage and passion behind Surties Sweet Shop, where tradition meets innovation in every delightful bite.
+            </p>
+        </div>
+    </header>
+
+    <!-- Story Section -->
+    <section class="story-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <img src="img/about shop.jpg.crdownload" alt="Our Shop" class="img-fluid story-image">
+                </div>
+                <div class="col-lg-6">
+                    <div class="story-content">
+                        <h2>A Legacy of Sweetness Since 2020</h2>
+                        <p>What started as a small sweet shop in Surat has blossomed into a beloved destination for authentic Indian sweets. For over three decades, we've been crafting delicious moments and spreading joy through our traditional recipes.</p>
+                        <p>Each sweet in our collection tells a story - of tradition, of innovation, and of our commitment to quality. We take pride in using the finest ingredients and time-honored techniques passed down through generations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Owners Section -->
+    <section class="owners-section py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Meet Our Founders</h2>
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="owner-card">
+                        <div class="owner-image">
+                            <img src="img/drashti5.jpg" alt="Owner 1" class="img-fluid">
+                        </div>
+                        <div class="owner-info">
+                            <h3>Drashti Adroja</h3>
+                            <p class="position">CEO/CO-FOUNDER</p>
+                            <p class="description">With over 5 years of experience in traditional sweet making, drashti brings expertise and innovation to our recipes.</p>
+                            <div class="social-links">
+                                <a href="#"><i class="bi bi-linkedin"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
+                                <a href="#"><i class="bi bi-twitter"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="owner-card">
+                        <div class="owner-image">
+                            <img src="img/mihika.jpg" alt="Owner 2" class="img-fluid">
+                        </div>
+                        <div class="owner-info">
+                            <h3>Mihika Padsala</h3>
+                            <p class="position">HEAD OF OPERATIONS</p>
+                            <p class="description">Mihika ensures smooth operations and maintains our high quality standards across all branches.</p>
+                            <div class="social-links">
+                                <a href="#"><i class="bi bi-linkedin"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
+                                <a href="#"><i class="bi bi-twitter"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="owner-card">
+                        <div class="owner-image">
+                            <img src="img/khushi.jpg" alt="Owner 3" class="img-fluid">
+                        </div>
+                        <div class="owner-info">
+                            <h3>Khushi Vekariya</h3>
+                            <p class="position">CREATIVE DIRECTOR</p>
+                            <p class="description">Khsuhi brings creativity to our traditional sweets, creating unique fusion flavors.</p>
+                            <div class="social-links">
+                                <a href="#"><i class="bi bi-linkedin"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
+                                <a href="#"><i class="bi bi-twitter"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="container">
+            <h2 class="text-center mb-5">Our Core Values</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="bi bi-heart-fill"></i>
+                        </div>
+                        <h4>Quality First</h4>
+                        <p>We never compromise on ingredients or preparation methods, ensuring every sweet meets our high standards.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <h4>Tradition & Innovation</h4>
+                        <p>Balancing time-honored recipes with modern techniques to create unique taste experiences.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h4>Customer Happiness</h4>
+                        <p>Your satisfaction is our priority. We strive to exceed expectations with every interaction.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-number">30+</div>
+                        <div class="stat-label">Years of Excellence</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-label">Sweet Varieties</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-number">100K+</div>
+                        <div class="stat-label">Happy Customers</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Store Locations</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Surties Sweet Shop</h5>
+                    <p>Bringing sweetness to your life since 1990</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-dark me-3"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-dark me-3"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-dark"><i class="bi bi-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCYpnxWzjIV-N6PnL-0hA_xlb4wcdQljw"></script>
+    <script type="module" src="/js/firebase-config.js"></script>
+    <script type="module" src="/js/auth.js"></script>
+    <script>
+        // Check auth state on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateAuthUI();
+        });
+    </script>
+    <script type="module">
+        import { auth } from '/js/firebase-config.js';
+        
+        window.handleSignOut = async (e) => {
+            e.preventDefault();
+            try {
+                await auth.signOut();
+                localStorage.clear(); // Clear all local storage
+                window.location.href = '/auth.html'; // Redirect to auth page
+            } catch (error) {
+                console.error('Sign out error:', error);
+                alert('Error signing out. Please try again.');
+            }
+        };
+
+        // Update auth UI on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const userData = localStorage.getItem('user');
+            const loginButton = document.getElementById('loginButton');
+            const userDropdown = document.getElementById('userDropdown');
+            const userDisplayName = document.getElementById('userDisplayName');
+
+            if (userData) {
+                loginButton.classList.add('d-none');
+                userDropdown.classList.remove('d-none');
+                const user = JSON.parse(userData);
+                userDisplayName.textContent = user.displayName || user.email;
+            } else {
+                loginButton.classList.remove('d-none');
+                userDropdown.classList.add('d-none');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Surties Sweet Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .cart-item-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        
+        .quantity-control {
+            width: 120px;
+        }
+        
+        .weight-control {
+            width: 150px;
+        }
+        
+        .checkout-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .cart-item {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .cart-item:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .payment-method-select {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-method-select:hover {
+            border-color: #ff4757;
+        }
+
+        .payment-method-select.selected {
+            border-color: #ff4757;
+            background: #fff5f5;
+        }
+
+        #checkoutForm {
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Order Success Popup Styles */
+        .order-success-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .order-success-content {
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .order-success-popup.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .order-success-popup.active .order-success-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Update success checkmark styles */
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: #4BB543;
+            position: relative;
+            animation: scaleIn 0.3s ease-in-out forwards;
+        }
+
+        .success-checkmark svg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 50px;
+            height: 50px;
+            animation: checkmark 0.5s ease-in-out 0.3s forwards;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        @keyframes checkmark {
+            from { transform: translate(-50%, -50%) scale(0); }
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .tracking-button {
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slide-up 0.5s ease 1.5s forwards;
+        }
+
+        @keyframes slide-up {
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <audio id="successSound">
+        <source src="sounds/success.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Import your existing navbar here -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <!-- ...existing navbar code... -->
+    </nav>
+
+    <div class="container my-5">
+        <h2 class="mb-4">Shopping Cart</h2>
+        
+        <div class="row">
+            <!-- Cart Items Section -->
+            <div class="col-lg-8">
+                <div id="cartItems">
+                    <!-- Cart items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Checkout Section -->
+            <div class="col-lg-4">
+                <div class="checkout-section">
+                    <h4 class="mb-3">Order Summary</h4>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total:</span>
+                        <span>₹<span id="total">0</span></span>
+                    </div>
+                    <button id="checkoutButton" class="btn btn-primary w-100 mb-3" onclick="showCheckoutForm()">
+                        Proceed to Checkout
+                    </button>
+
+                    <form id="checkoutForm" class="mt-4">
+                        <h5 class="mb-3">Delivery Details</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="userName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="userEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="userPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" id="userAddress" rows="3" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" id="userCity" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">State</label>
+                                <input type="text" class="form-control" id="userState" required>
+                            </div>
+                        </div>
+
+                        <h5 class="mb-3">Payment Method</h5>
+                        <div class="payment-method-select" onclick="selectPaymentMethod('prepaid')">
+                            <input type="radio" name="paymentMethod" value="prepaid" checked>
+                            <label class="ms-2">Prepaid (Cards/UPI/Netbanking)</label>
+                        </div>
+                        <div class="payment-method-select" onclick="selectPaymentMethod('cod')">
+                            <input type="radio" name="paymentMethod" value="cod">
+                            <label class="ms-2">Cash on Delivery</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="order-success-popup">
+        <div class="order-success-content">
+            <div class="success-checkmark">
+                <svg viewBox="0 0 24 24">
+                    <path fill="none" stroke="#FFFFFF" 
+                          stroke-width="2" 
+                          stroke-linecap="round" 
+                          stroke-linejoin="round"
+                          d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h2 class="mb-4">Order Placed Successfully!</h2>
+            <p class="text-muted mb-4">Your order has been confirmed and will be delivered soon.</p>
+            <div class="tracking-button">
+                <a href="#" id="trackOrderButton" class="btn btn-primary btn-lg">
+                    <i class="bi bi-geo-alt me-2"></i>Track Order
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Get cart from localStorage
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+        function updateCartUI() {
+            const cartItems = document.getElementById('cartItems');
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-cart-x fs-1 text-muted"></i>
+                        <h4 class="mt-3">Your cart is empty</h4>
+                        <a href="/" class="btn btn-primary mt-3">Continue Shopping</a>
+                    </div>
+                `;
+                updateTotals();
+                return;
+            }
+
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="d-flex gap-3">
+                        <img src="${item.image}" 
+                             alt="${item.name}" 
+                             class="cart-item-image">
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <h5>${item.name}</h5>
+                                <button class="btn btn-sm btn-outline-danger" 
+                                        onclick="removeFromCart('${item._id}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            <p class="text-muted mb-2">₹${item.price}/${item.unit}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                ${item.unit === 'kg' ? `
+                                    <div class="input-group weight-control">
+                                        <span class="input-group-text">KG</span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               value="${item.weight || 0.25}"
+                                               min="0.25" 
+                                               step="0.25"
+                                               onchange="updateWeight('${item._id}', this.value)">
+                                    </div>
+                                ` : `
+                                    <div class="input-group quantity-control">
+                                        <button class="btn btn-outline-secondary" 
+                                                onclick="updateQuantity('${item._id}', -1)">-</button>
+                                        <span class="input-group-text">${item.quantity || 1}</span>
+                                        <button class="btn btn-outline-secondary" 
+                                                onclick="updateQuantity('${item._id}', 1)">+</button>
+                                    </div>
+                                `}
+                                <h6 class="mb-0">₹${calculateItemTotal(item).toFixed(2)}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            updateTotals();
+        }
+
+        function calculateItemTotal(item) {
+            if (item.unit === 'kg') {
+                return item.price * (item.weight || 0.25);
+            } else {
+                return item.price * (item.quantity || 1);
+            }
+        }
+
+        function updateTotals() {
+            const subtotal = cart.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+            const total = subtotal;
+
+            // Update subtotal and total displays
+            document.getElementById('total').textContent = total.toFixed(2);
+            
+            // Update checkout button state
+            document.getElementById('checkoutButton').disabled = cart.length === 0;
+
+            // Store total in localStorage for access during checkout
+            localStorage.setItem('cartTotal', total);
+        }
+
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item._id !== itemId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function updateWeight(itemId, weight) {
+            const item = cart.find(i => i._id === itemId);
+            if (item) {
+                item.weight = Math.max(0.25, parseFloat(weight));
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartUI();
+            }
+        }
+
+        function updateQuantity(itemId, change) {
+            const item = cart.find(i => i._id === itemId);
+            if (item) {
+                item.quantity = Math.max(1, (item.quantity || 1) + change);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartUI();
+            }
+        }
+
+        function showCheckoutForm() {
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                window.location.href = '/auth.html?redirect=cart';
+                return;
+            }
+
+            document.getElementById('checkoutForm').style.display = 'block';
+            document.getElementById('checkoutButton').style.display = 'none';
+
+            // Pre-fill user details
+            const user = JSON.parse(userData);
+            document.getElementById('userName').value = user.displayName || '';
+            document.getElementById('userEmail').value = user.email || '';
+        }
+
+        function selectPaymentMethod(method) {
+            document.querySelectorAll('.payment-method-select').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            document.querySelector(`input[value="${method}"]`).checked = true;
+        }
+
+        // Handle form submission
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            
+            if (paymentMethod === 'cod') {
+                handleCashOnDelivery();
+            } else {
+                initializeRazorpay();
+            }
+        });
+
+        // Add Razorpay initialization function
+        function initializeRazorpay() {
+            const total = parseFloat(document.getElementById('total').textContent);
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+
+            const options = {
+                key: 'rzp_live_1ZlF3tPntMSkxX', // Your Razorpay key
+                amount: Math.round(total * 100), // Amount in paise
+                currency: 'INR',
+                name: 'Surties Sweet Shop',
+                description: 'Sweet Shop Purchase',
+                prefill: {
+                    name: document.getElementById('userName').value,
+                    email: document.getElementById('userEmail').value,
+                    contact: document.getElementById('userPhone').value
+                },
+                notes: {
+                    address: document.getElementById('userAddress').value,
+                    state: document.getElementById('userState').value,
+                    city: document.getElementById('userCity').value
+                },
+                handler: function(response) {
+                    handlePaymentSuccess(response, {
+                        name: document.getElementById('userName').value,
+                        email: document.getElementById('userEmail').value,
+                        phone: document.getElementById('userPhone').value,
+                        address: document.getElementById('userAddress').value,
+                        city: document.getElementById('userCity').value,
+                        state: document.getElementById('userState').value
+                    });
+                }
+            };
+
+            try {
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function(response) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Place Order';
+                    alert('Payment failed: ' + response.error.description);
+                });
+                rzp.open();
+            } catch (error) {
+                console.error('Razorpay error:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Place Order';
+                alert('Failed to initialize payment. Please try again.');
+            }
+        }
+
+        function showSuccessPopup(orderId) {
+            const popup = document.querySelector('.order-success-popup');
+            const trackButton = document.getElementById('trackOrderButton');
+            const sound = document.getElementById('successSound');
+            
+            // Show popup
+            popup.classList.add('active');
+            
+            // Play success sound with full volume
+            sound.volume = 1;
+            sound.currentTime = 0;
+            sound.play().catch(err => console.log("Sound play failed:", err));
+            
+            // Store order ID for tracking
+            localStorage.setItem(`order_${orderId}`, JSON.stringify({
+                id: orderId,
+                date: new Date().toISOString(),
+                address: document.getElementById('userAddress').value,
+                city: document.getElementById('userCity').value,
+                state: document.getElementById('userState').value
+            }));
+            
+            // Update tracking button href
+            trackButton.href = `/tracking.html?id=${orderId}`;
+            
+            // Wait 5 seconds before redirecting
+            setTimeout(() => {
+                window.location.href = `/tracking.html?id=${orderId}`;
+            }, 5000);
+        }
+
+        function handlePaymentSuccess(response, customerDetails) {
+            const orderData = {
+                orderId: `ORD${Date.now()}`,
+                userId: JSON.parse(localStorage.getItem('user')).uid,
+                customerDetails: customerDetails,
+                items: cart,
+                totalAmount: parseFloat(document.getElementById('total').textContent),
+                paymentMethod: 'prepaid',
+                paymentId: response.razorpay_payment_id,
+                status: 'confirmed',
+                orderDate: new Date().toISOString()
+            };
+
+            // Save order to database
+            fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Generate receipt
+                    generateReceipt(response, customerDetails);
+                    // Clear cart
+                    cart = [];
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    // Show success popup
+                    showSuccessPopup(response.razorpay_payment_id);
+                } else {
+                    throw new Error(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Order save error:', error);
+                alert('Error saving order. Please contact support.');
+            });
+        }
+
+        function handleCashOnDelivery() {
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+
+            const orderData = {
+                orderId: `COD${Date.now()}`, // This is the COD order ID
+                userId: JSON.parse(localStorage.getItem('user')).uid,
+                customerDetails: {
+                    name: document.getElementById('userName').value,
+                    email: document.getElementById('userEmail').value,
+                    phone: document.getElementById('userPhone').value,
+                    address: document.getElementById('userAddress').value,
+                    city: document.getElementById('userCity').value,
+                    state: document.getElementById('userState').value
+                },
+                items: cart,
+                totalAmount: parseFloat(document.getElementById('total').textContent),
+                paymentMethod: 'cod',
+                status: 'pending',
+                orderDate: new Date().toISOString()
+            };
+
+            // Save COD order to database
+            fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Generate receipt with COD order ID
+                    generateReceipt({ 
+                        razorpay_payment_id: orderData.orderId, // Use COD order ID
+                        paymentMethod: 'COD'
+                    }, orderData.customerDetails);
+                    
+                    // Clear cart
+                    cart = [];
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    
+                    // Pass COD order ID to success popup
+                    showSuccessPopup(orderData.orderId);
+                } else {
+                    throw new Error(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Order save error:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Place Order';
+                alert('Error placing order. Please try again.');
+            });
+        }
+
+        // Add receipt generation function
+        function generateReceipt(response, customerDetails) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add receipt content
+            doc.setFontSize(20);
+            doc.text('Surties Sweet Shop', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.text(`Order ID: ${response.razorpay_payment_id}`, 20, 40);
+            doc.text(`Date: ${new Date().toLocaleString()}`, 20, 50);
+            doc.text(`Payment Method: ${response.paymentMethod || 'Prepaid'}`, 20, 60);
+            
+            // Customer details
+            doc.text('Customer Details:', 20, 80);
+            doc.text(`Name: ${customerDetails.name}`, 20, 90);
+            doc.text(`Phone: ${customerDetails.phone}`, 20, 100);
+            doc.text(`Address: ${customerDetails.address}`, 20, 110);
+            
+            // Order items
+            doc.text('Order Items:', 20, 130);
+            let y = 140;
+            cart.forEach(item => {
+                const quantity = item.unit === 'kg' ? `${item.weight}kg` : `${item.quantity} pcs`;
+                doc.text(`${item.name} - ${quantity} x ₹${item.price}`, 20, y);
+                y += 10;
+            });
+            
+            // Total
+            doc.text(`Total Amount: ₹${document.getElementById('total').textContent}`, 20, y + 10);
+            
+            // Save PDF
+            doc.save(`surties-receipt-${response.razorpay_payment_id}.pdf`);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartUI();
+            
+            // Pre-fill user data if available
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('userName').value = user.displayName || '';
+                document.getElementById('userEmail').value = user.email || '';
+            }
+        });
+    </script>
+
+    <!-- Import your existing payment handling code -->
+    <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surties - Sweet Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <!-- Add Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        .hero-section {
+            height: 90vh;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.4));
+        }
+        .hero-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.1);
+        }
+        .hero-slide.active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 1s ease-in-out, transform 6s ease-in-out;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 40px 0;
+            margin-top: 50px;
+        }
+        .cart-icon {
+            position: relative;
+            padding: 8px 15px !important;
+            transition: all 0.3s ease;
+        }
+        .cart-icon:hover {
+            transform: scale(1.1);
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            background-color: #ff4757;
+            transition: all 0.3s ease;
+        }
+        .cart-sidebar {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+            transition: right 0.3s ease;
+            z-index: 1050;
+            padding: 20px;
+        }
+        .cart-sidebar.active {
+            right: 0;
+        }
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1040;
+        }
+        .cart-overlay.active {
+            display: block;
+        }
+        /* New Navbar Styles */
+        .navbar {
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff4757 !important;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-link {
+            font-weight: 500;
+            padding: 8px 15px !important;
+            margin: 0 5px;
+            color: #2f3542 !important;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: #ff4757;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-link:hover {
+            color: #ff4757 !important;
+        }
+
+        /* Shrink navbar on scroll */
+        .navbar.scrolled {
+            padding: 10px 0;
+            background-color: rgba(255, 255, 255, 0.98) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: white;
+                padding: 15px;
+                border-radius: 8px;
+                margin-top: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* Add these new dropdown hover styles */
+        .dropdown:hover .dropdown-menu {
+            display: block;
+            margin-top: 0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 8px 0;
+        }
+
+        .dropdown-item {
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #ff4757;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* Remove dropdown toggle caret */
+        .dropdown-toggle::after {
+            display: none;
+        }
+
+        .hero-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .hero-content p {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .hero-content .btn {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 12px 30px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .hero-content .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 3rem;
+            }
+            .hero-content p {
+                font-size: 1.5rem;
+            }
+        }
+
+        .order-timeline {
+            position: relative;
+            padding: 20px 0;
+            margin: 0 40px;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: #28a745;
+            transition: width 0.5s ease;
+        }
+
+        .timeline-points {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .timeline-points::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #e9ecef;
+            transform: translateY(-50%);
+        }
+
+        .point {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .point-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 3px solid #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .point.active .point-icon {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+        }
+
+        .point-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .point.active .point-label {
+            color: #28a745;
+        }
+
+        .point-time {
+            font-size: 0.75rem;
+            color: #adb5bd;
+        }
+
+        .point.active .point-time {
+            color: #28a745;
+        }
+
+        /* Enhanced Toast Styles */
+        .custom-toast {
+            min-width: 300px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation-duration: 0.3s;
+        }
+
+        .toast-success {
+            border-left: 4px solid #28a745;
+        }
+
+        .toast-error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .toast-info {
+            border-left: 4px solid #17a2b8;
+        }
+
+        .toast-warning {
+            border-left: 4px solid #ffc107;
+        }
+
+        .toast-action {
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toast-action:hover {
+            background: #e9ecef;
+        }
+
+        .bi-check-circle-fill { color: #28a745; }
+        .bi-exclamation-circle-fill { color: #dc3545; }
+        .bi-info-circle-fill { color: #17a2b8; }
+        .bi-exclamation-triangle-fill { color: #ffc107; }
+
+        .custom-toast {
+            min-width: 300px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation-duration: 0.3s;
+        }
+
+        .toast-warning {
+            border-left: 4px solid #ffc107;
+        }
+
+        .toast-action button {
+            transition: all 0.3s ease;
+            border: 1px solid #dee2e6;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .toast-action button:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-1px);
+        }
+
+        /* Update icon colors */
+        .toast-warning .bi-exclamation-triangle-fill {
+            color: #ffc107;
+        }
+
+        .toast-message {
+            font-size: 0.95rem;
+            color: #495057;
+        }
+
+        /* Update Toast Container Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;  /* Changed from right to left */
+            z-index: 1060;
+        }
+
+        .custom-toast {
+            min-width: 300px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation-duration: 0.3s;
+            border-left: 4px solid transparent;
+            transform-origin: left center; /* Changed from right to left */
+        }
+
+        @keyframes fadeInLeft {  /* New animation */
+            from {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeOutLeft {  /* New animation */
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Update Toast Action Styles */
+        .toast-action {
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .toast-action .btn {
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+        }
+
+        .toast-action .btn-light {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+
+        .toast-action .btn-light:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .toast-action .btn-primary {
+            background: #ff4757;
+            border: none;
+        }
+
+        .toast-action .btn-primary:hover {
+            background: #ff2e44;
+            transform: translateY(-1px);
+        }
+
+        /* Add hover effect to pause animation */
+        .custom-toast:hover {
+            animation-play-state: paused;
+        }
+
+        /* Add these new logo styles before existing styles */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .logo-icon {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            transform-style: preserve-3d;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: #ff4757;
+            filter: drop-shadow(0 4px 6px rgba(255, 71, 87, 0.3));
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff4757;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .brand-slogan {
+            font-size: 12px;
+            color: #2f3542;
+            font-family: 'Dancing Script', cursive;
+            margin-top: -5px;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotateY(0);
+            }
+            50% {
+                transform: translateY(-5px) rotateY(180deg);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 5px rgba(255, 71, 87, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                text-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+                transform: scale(1.05);
+            }
+        }
+
+        /* New Footer Styles */
+        .footer {
+            background: linear-gradient(to right, #2f3542, #57606f);
+            padding: 70px 0 20px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, #ff4757, #ff6b6b);
+        }
+
+        .footer h5 {
+            color: #ff4757;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .footer p {
+            color: #a4b0be;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .footer-contact li {
+            color: #a4b0be;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-contact i {
+            color: #ff4757;
+            font-size: 1.2rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: #ff4757;
+            transform: translateY(-3px);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .footer-bottom {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            color: #a4b0be;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #a4b0be;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .footer-links a:hover {
+            color: #ff4757;
+            transform: translateX(5px);
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .footer-logo img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .footer-logo span {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .rating-display {
+            color: #ffc107;
+            font-size: 0.9rem;
+        }
+        .rating-display i {
+            margin-right: 2px;
+        }
+
+        .help-widget {
+            position: fixed;
+            right: 15px;
+            bottom: 15px;
+            z-index: 1050;
+        }
+
+        .help-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #ff4757;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(255, 71, 87, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .help-button:hover {
+            transform: scale(1.1);
+        }
+
+        .help-button i {
+            font-size: 1.2rem;
+        }
+
+        .help-button span {
+            display: none;
+        }
+
+        .favorites-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            z-index: 1050;
+            transition: right 0.3s ease;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .favorites-sidebar.active {
+            right: 0;
+        }
+
+        .like-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .like-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .favorites-icon {
+            position: relative;
+        }
+
+        .favorites-count {
+            position: absolute;
+            top: 0;
+            right: -5px;
+            background: #ff4757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .help-form {
+            position: fixed;
+            bottom: 70px;
+            right: 15px;
+            width: 350px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1050;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .help-form.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .help-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .help-close {
+            background: none;
+            border: none;
+            color: #666;
+            padding: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .help-close:hover {
+            color: #ff4757;
+            transform: scale(1.1);
+        }
+
+        .help-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        /* Add new scrolling track styles */
+        .scroll-track-container {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            z-index: 3;
+            padding: 20px 0;
+            background: linear-gradient(to right, 
+                rgba(0,0,0,0.8) 0%, 
+                rgba(0,0,0,0.5) 20%, 
+                rgba(0,0,0,0.3) 50%, 
+                rgba(0,0,0,0.5) 80%, 
+                rgba(0,0,0,0.8) 100%
+            );
+        }
+
+        .scroll-track {
+            display: flex;
+            gap: 20px;
+            animation: scroll 60s linear infinite;
+            width: max-content;
+        }
+
+        .scroll-track img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .scroll-track img:hover {
+            transform: scale(1.1) translateY(-10px);
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Remove existing floating-sweet styles and animations */
+        .floating-sweet {
+            display: none;
+        }
+    </style>
+    <!-- Add Razorpay Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- Add jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand logo-container" href="/">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 512 512">
+                        <path d="M416 256c0 88.4-71.6 160-160 160S96 344.4 96 256s71.6-160 160-160 160 71.6 160 160zm-80-64c0-44.2-35.8-80-80-80s-80 35.8-80 80 35.8 80 80 80 80-35.8 80-80zm-168 64c0-13.3-10.7-24-24-24s-24 10.7-24 24 10.7 24 24 24 24-10.7 24-24zm248 0c0-13.3-10.7-24-24-24s-24 10.7-24 24 10.7 24 24 24 24-10.7 24-24zM256 432c79.4 0 144-64.6 144-144s-64.6-144-144-144-144 64.6-144 144 64.6 144 144 144z"/>
+                        <circle cx="256" cy="256" r="48" fill="#ff4757"/>
+                        <path d="M256 176c-44.2 0-80 35.8-80 80s35.8 80 80 80 80-35.8 80-80-35.8-80-80-80zm0 128c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48z" fill="#ff4757"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="brand-name">Surties</span>
+                    <span class="brand-slogan">sweetshop</span>
+                </div>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about.html">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" role="button">
+                            Products <i class="bi bi-chevron-down ms-1 small"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#products" data-category="all">
+                                <i class="bi bi-circle-fill me-2 small"></i>All Products</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#products" data-category="Chocolates">
+                                <i class="bi bi-circle-fill me-2 small"></i>Chocolates</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#products" data-category="Namkeen">
+                                <i class="bi bi-circle-fill me-2 small"></i>Namkeen</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#products" data-category="Festival Sweets">
+                                <i class="bi bi-circle-fill me-2 small"></i>Festival Sweets</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#products" data-category="Cookies">
+                                <i class="bi bi-circle-fill me-2 small"></i>Cookies</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#trackOrderModal">
+                            <i class="bi bi-geo-alt me-1"></i>Track Order
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" id="accountSection">
+                        <a class="nav-link" href="/auth.html" id="loginButton">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Login</span>
+                        </a>
+                        <a class="nav-link dropdown-toggle d-none" href="#" id="userDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                            <span id="userDisplayName"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item login-another" href="#" onclick="handleSignOut(event)">
+                                    <i class="bi bi-person-plus me-2"></i>
+                                    Login with Another Account
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="handleSignOut(event)">
+                                    <i class="bi bi-box-arrow-right me-2"></i>
+                                    Sign Out
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link favorites-icon" href="/favorites.html">
+                            <i class="bi bi-heart"></i>
+                            <span class="favorites-count" id="favoritesCount">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link cart-icon" href="/cart.html">
+                            <i class="bi bi-cart3"></i>
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="hero-slide active" style="background-image: url('img/kaju-katli\ w1.png')">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-slide" style="background-image: url('img/w23.jpg')">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-slide" style="background-image: url('img/w3.webp')">
+            <div class="hero-overlay"></div>
+        </div>
+
+        <!-- Replace floating sweets with scrolling track -->
+        <div class="scroll-track-container">
+            <div class="scroll-track">
+                <!-- First set of images -->
+                <img src="img/kajukatri.avif" alt="Sweet 1">
+                <img src="img/s1.avif" alt="Sweet 2">
+                <img src="img/s4.jpg" alt="Sweet 3">
+                <img src="img/r5.jpg" alt="Sweet 4">
+                <img src="img/s6.jpg" alt="Sweet 5">
+                <img src="img/w7.jpg" alt="Sweet 6">
+                <img src="img/s8.webp" alt="Sweet 7">
+                <img src="img/kajukatri.avif" alt="Sweet 8">
+                <img src="img/s1.avif" alt="Sweet 9">
+                <img src="img/s4.jpg" alt="Sweet 10">
+                <!-- Duplicate set for seamless scrolling -->
+                <img src="img/kajukatri.avif" alt="Sweet 1">
+                <img src="img/s1.avif" alt="Sweet 2">
+                <img src="img/s4.jpg" alt="Sweet 3">
+                <img src="img/r5.jpg" alt="Sweet 4">
+                <img src="img/s6.jpg" alt="Sweet 5">
+                <img src="img/w7.jpg" alt="Sweet 6">
+                <img src="img/s8.webp" alt="Sweet 7">
+                <img src="img/kajukatri.avif" alt="Sweet 8">
+                <img src="img/s1.avif" alt="Sweet 9">
+                <img src="img/s4.jpg" alt="Sweet 10">
+            </div>
+        </div>
+
+        <div class="container h-100">
+            <div class="row h-100 align-items-center">
+                <div class="col-md-6 hero-content">
+                    <h1 class="display-4 text-white animate__animated animate__fadeInLeft">Welcome to Surties</h1>
+                    <p class="lead text-white animate__animated animate__fadeInLeft animate__delay-1s mb-4">
+                        Discover the authentic taste of Indian sweets
+                    </p>
+                    <a href="#products" class="btn btn-primary btn-lg animate__animated animate__fadeInUp animate__delay-2s">
+                        Explore Our Sweets
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="container my-5">
+        <h2 class="text-center mb-4">Our Products</h2>
+        <div id="sweetsList" class="row"></div>
+    </section>
+
+    <!-- Replace existing footer with this new one -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <div class="footer-logo">
+                        <i class="bi bi-shop text-white fs-2"></i>
+                        <span>Surties</span>
+                    </div>
+                    <p>Bringing the authentic taste of traditional Indian sweets to your doorstep since 1990. Made with love, served with pride.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-twitter"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <h5>Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="/"><i class="bi bi-chevron-right"></i> Home</a></li>
+                        <li><a href="about.html"><i class="bi bi-chevron-right"></i> About Us</a></li>
+                        <li><a href="tracking.html"><i class="bi bi-chevron-right"></i> Track Order</a></li>
+                        <li><a href="contact.html"><i class="bi bi-chevron-right"></i> Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h5>Contact Info</h5>
+                    <ul class="footer-contact list-unstyled">
+                        <li>
+                            <i class="bi bi-geo-alt"></i>
+                            <span>7,8,9, Dharmanandan Complex, Savaliya Circle, Surat, Gujarat 395010</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-telephone"></i>
+                            <span>+91 1234567890</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-envelope"></i>
+                            <span>info@surties.com</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-clock"></i>
+                            <span>Open Daily: 9:00 AM - 10:00 PM</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="mb-0">© 2024 Surties Sweet Shop. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Replace Cart Modal with Cart Sidebar -->
+    <div class="cart-overlay" onclick="hideCart()"></div>
+    <div class="cart-sidebar">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0">Shopping Cart</h5>
+            <button class="btn-close" onclick="hideCart()"></button>
+        </div>
+        <div id="cartItems" class="overflow-auto" style="max-height: calc(100vh - 200px);">
+            <p>Your cart is empty</p>
+        </div>
+        <div class="position-absolute bottom-0 start-0 end-0 p-3 bg-white border-top">
+            <div class="mb-3">
+                <p class="d-flex justify-content-between mb-2">
+                    <span>Subtotal:</span>
+                    <span>₹<span id="cartTotal">0</span></span>
+                </p>
+            </div>
+            <button class="btn btn-primary w-100" onclick="proceedToBuy()">Proceed to Buy</button>
+        </div>
+        <div id="checkoutForm" style="display: none;">
+            <h5 class="mb-3">Checkout Details</h5>
+            <form id="userDetailsForm" class="mb-3">
+                <div class="mb-2">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" id="userName" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="userEmail" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="userPhone" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Address</label>
+                    <textarea class="form-control" id="userAddress" required></textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">State</label>
+                    <input type="text" class="form-control" id="userState" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">City</label>
+                    <input type="text" class="form-control" id="userCity" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Proceed to Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Favorites Sidebar -->
+    <div class="favorites-sidebar">
+        <div class="position-absolute w-100">
+            <div class="d-flex justify-content-between align-items-center p-3 bg-light border-bottom">
+                <h5 class="mb-0">My Favorites</h5>
+                <button type="button" class="btn-close" onclick="hideFavorites()"></button>
+            </div>
+            <div id="favoritesList" class="p-3"></div>
+        </div>
+    </div>
+
+    <!-- Order Tracking Modal -->
+    <div class="modal fade" id="trackingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Track Your Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>Order ID:</strong> <span id="trackingOrderId"></span>
+                    </div>
+                    
+                    <!-- Add Order Status Timeline -->
+                    <div class="order-timeline mb-4">
+                        <div class="timeline-progress" id="timelineProgress"></div>
+                        <div class="timeline-points">
+                            <div class="point" data-status="order-confirmed">
+                                <div class="point-icon"><i class="bi bi-check-circle"></i></div>
+                                <div class="point-label">Order Confirmed</div>
+                                <div class="point-time" id="confirmedTime">--:--</div>
+                            </div>
+                            <div class="point" data-status="preparing">
+                                <div class="point-icon"><i class="bi bi-gear"></i></div>
+                                <div class="point-label">Preparing</div>
+                                <div class="point-time" id="preparingTime">--:--</div>
+                            </div>
+                            <div class="point" data-status="dispatched">
+                                <div class="point-icon"><i class="bi bi-truck"></i></div>
+                                <div class="point-label">Out for Delivery</div>
+                                <div class="point-time" id="dispatchedTime">--:--</div>
+                            </div>
+                            <div class="point" data-status="delivered">
+                                <div class="point-icon"><i class="bi bi-house-check"></i></div>
+                                <div class="point-label">Delivered</div>
+                                <div class="point-time" id="deliveredTime">--:--</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Distance:</strong> <span id="orderDistance"></span><br>
+                        <strong>Estimated Time:</strong> <span id="estimatedTime"></span>
+                    </div>
+                    <div id="orderMap" style="height: 400px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Track Order Modal -->
+    <div class="modal fade" id="trackOrderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Track Your Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Enter Payment ID</label>
+                        <input type="text" class="form-control" id="trackingPaymentId" placeholder="e.g., pay_123456">
+                    </div>
+                    <button onclick="trackOrderById()" class="btn btn-primary w-100 mt-3">Track Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Button and Form -->
+    <div class="help-widget">
+        <button class="help-button" onclick="toggleHelpForm()" title="Need Help?">
+            <i class="bi bi-question-circle"></i>
+        </button>
+        
+        <div class="help-form" id="helpForm">
+            <div class="help-header">
+                <h5 class="mb-0">How can we help you?</h5>
+                <button class="help-close" onclick="toggleHelpForm()" type="button">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="help-body p-3">
+                <form id="customerHelpForm" onsubmit="submitHelpRequest(event)">
+                    <div class="mb-3">
+                        <label class="form-label">Issue Type</label>
+                        <select class="form-select" name="type" id="issueType" onchange="toggleBankDetails()" required>
+                            <option value="">Select Issue Type</option>
+                            <option value="refund">Refund Request</option>
+                            <option value="query">General Query</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Order ID (if applicable)</label>
+                        <input type="text" class="form-control" name="orderId">
+                    </div>
+                    
+                    <!-- Add bank details section -->
+                    <div id="bankDetails" style="display: none;">
+                        <hr>
+                        <h6 class="mb-3">Bank Details</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Bank Name</label>
+                            <input type="text" class="form-control" name="bankName">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Account Number</label>
+                            <input type="text" class="form-control" name="accountNumber" 
+                                   pattern="\d{9,18}" title="Please enter a valid account number">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">IFSC Code</label>
+                            <input type="text" class="form-control" name="ifscCode" 
+                                   pattern="^[A-Z]{4}0[A-Z0-9]{6}$" 
+                                   title="Please enter a valid IFSC code">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" name="message" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Before the closing body tag, replace the existing scripts with: -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBH2MtV0hLHArBCIvVJdIfG129cqifcCdI&libraries=places"></script>
+    <script src="/js/main.js"></script>
+    <script type="module">
+        import { auth } from '/js/firebase-config.js';
+        
+        window.handleSignOut = async (e) => {
+            e.preventDefault();
+            try {
+                await auth.signOut();
+                localStorage.clear(); // Clear all local storage
+                window.location.href = '/auth.html'; // Redirect to auth page
+            } catch (error) {
+                console.error('Sign out error:', error);
+                alert('Error signing out. Please try again.');
+            }
+        };
+
+        // Update auth UI on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const userData = localStorage.getItem('user');
+            const loginButton = document.getElementById('loginButton');
+            const userDropdown = document.getElementById('userDropdown');
+            const userDisplayName = document.getElementById('userDisplayName');
+
+            if (userData) {
+                loginButton.classList.add('d-none');
+                userDropdown.classList.remove('d-none');
+                const user = JSON.parse(userData);
+                userDisplayName.textContent = user.displayName || user.email;
+            } else {
+                loginButton.classList.remove('d-none');
+                userDropdown.classList.add('d-none');
+            }
+        });
+
+        function getStarRating(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    stars += '<i class="bi bi-star-fill"></i>';
+                } else if (i - rating <= 0.5) {
+                    stars += '<i class="bi bi-star-half"></i>';
+                } else {
+                    stars += '<i class="bi bi-star"></i>';
+                }
+            }
+            return stars;
+        }
+
+        function toggleBankDetails() {
+            const issueType = document.getElementById('issueType').value;
+            const bankDetails = document.getElementById('bankDetails');
+            if (issueType === 'refund') {
+                bankDetails.style.display = 'block';
+            } else {
+                bankDetails.style.display = 'none';
+            }
+        }
+
+        // Update slider timing to 3 seconds
+        function rotateSlides() {
+            const slides = document.querySelectorAll('.hero-slide');
+            let currentSlide = 0;
+
+            setInterval(() => {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }, 3000); // Changed to 3000ms (3 seconds)
+        }
+    </script>
+</body>
+</html>
