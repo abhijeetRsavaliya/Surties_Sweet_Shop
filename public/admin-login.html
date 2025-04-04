@@ -44,58 +44,53 @@
     </div>
 
     <script>
+        // Check if already logged in
+        fetch('/admin-auth-check')
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/admin';
+                }
+            });
+
         document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const adminId = document.getElementById('adminId').value;
             const adminPass = document.getElementById('adminPass').value;
-            const submitBtn = this.querySelector('button[type="submit"]');
+            const errorMessage = document.getElementById('errorMessage');
+            const submitButton = this.querySelector('button');
             
-            try {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Logging in...';
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Logging in...';
+            errorMessage.style.display = 'none';
 
+            try {
                 const response = await fetch('/admin-auth', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ adminId, adminPass })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    // Store credentials in localStorage
-                    localStorage.setItem('adminId', adminId);
-                    localStorage.setItem('adminPass', adminPass);
-                    
-                    // Redirect to admin panel
                     window.location.href = '/admin';
                 } else {
-                    throw new Error(data.error || 'Invalid credentials');
+                    throw new Error('Invalid credentials');
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                alert(error.message || 'Login failed. Please try again.');
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Login';
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Login';
             }
         });
 
-        // Check if already logged in
-        window.addEventListener('load', async () => {
-            try {
-                const response = await fetch('/check-admin-auth');
-                const data = await response.json();
-                if (data.authenticated) {
-                    window.location.href = '/admin';
-                }
-            } catch (error) {
-                console.error('Auth check error:', error);
-            }
-        });
+        // Prevent going back after logout
+        if (document.referrer.includes('/admin')) {
+            window.history.pushState(null, '', window.location.href);
+        }
     </script>
 </body>
 </html>

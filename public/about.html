@@ -7,262 +7,282 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
-        /* Add new styles */
-        .page-header {
-            background: linear-gradient(135deg, #ff4757, #ff6b81);
-            padding: 100px 0 80px;
-            margin-bottom: 80px;
+        .about-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa502 100%);
+            padding: 100px 0 50px;
+            color: white;
             position: relative;
             overflow: hidden;
         }
 
-        .page-header::after {
+        .about-header::before {
             content: '';
             position: absolute;
-            bottom: -50px;
+            top: 0;
             left: 0;
-            width: 100%;
-            height: 100px;
-            background: white;
-            transform: skewY(-3deg);
+            right: 0;
+            bottom: 0;
+            background: url('https://img.freepik.com/free-photo/indian-sweets-mithai-diwali-celebration_76158-534.jpg');
+            background-size: cover;
+            opacity: 0.1;
         }
 
-        .page-header h1 {
-            color: white;
-            font-family: 'Playfair Display', serif;
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .page-header p {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.2rem;
-            max-width: 600px;
+        .timeline {
+            position: relative;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 30px 0;  /* Reduced padding */
         }
 
-        .story-section {
-            padding: 80px 0;
+        .timeline::before {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 70%;  /* Reduced height */
+            background: linear-gradient(to bottom, #ff6b6b, #ffa502);
+            top: 15%;    /* Center vertically */
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 3px;
         }
 
-        .story-image {
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+        .timeline-item {
+            margin-bottom: 50px;
+            position: relative;
         }
 
-        .story-image:hover {
-            transform: translateY(-10px);
-        }
-
-        .story-content {
+        .timeline-content {
             padding: 30px;
-        }
-
-        .story-content h2 {
-            font-family: 'Playfair Display', serif;
-            color: #2d3436;
-            margin-bottom: 25px;
-        }
-
-        .story-content p {
-            color: #636e72;
-            line-height: 1.8;
-            margin-bottom: 20px;
-        }
-
-        .owners-section {
-            background: #fff;
-            padding: 100px 0;
-        }
-
-        .owner-card {
             background: white;
-            border-radius: 20px;
-            overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            height: 100%;
+            border-radius: 20px;
+            position: relative;
+            width: calc(50% - 50px);
+            animation: fadeIn 0.5s ease-in-out;
         }
 
-        .owner-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(255, 71, 87, 0.2);
-        }
-
-        .owner-image {
-            height: 300px;
-            overflow: hidden;
-        }
-
-        .owner-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .owner-card:hover .owner-image img {
-            transform: scale(1.1);
-        }
-
-        .owner-info {
-            padding: 25px;
-            text-align: center;
-        }
-
-        .owner-info h3 {
-            color: #2d3436;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .owner-info .position {
-            color: #ff4757;
-            font-weight: 600;
+        .timeline-content h4 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: #ff6b6b;
             margin-bottom: 15px;
         }
 
-        .owner-info .description {
-            color: #636e72;
-            font-size: 0.95rem;
+        .timeline-content p {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.3rem;
             line-height: 1.6;
-            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            float: left;
+            transform: translateX(-20px);
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            float: right;
+            transform: translateX(20px);
+        }
+
+        .timeline-content::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: #ff6b6b;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            top: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content::after {
+            right: -62px;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content::after {
+            left: -62px;
+        }
+
+        .timeline-item:hover .timeline-content::after {
+            transform: scale(1.2);
+            background: #ffa502;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .team-member {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .team-member img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stats-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .stats-box i {
+            font-size: 40px;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+
+        .stats-box h3 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #2d3436;
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 31px;
+            }
+
+            .timeline-content {
+                width: calc(100% - 90px);
+                float: right !important;
+            }
+
+            .timeline-content::after {
+                left: -50px !important;
+            }
+        }
+
+        /* Add new styles */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .team-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .team-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .team-info {
+            padding: 1.5rem;
+            text-align: center;
         }
 
         .social-links {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .social-links a {
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: #f1f2f6;
+            background: #f8f9fa;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #2d3436;
+            color: #ff6b6b;
             transition: all 0.3s ease;
         }
 
         .social-links a:hover {
-            background: #ff4757;
+            background: #ff6b6b;
             color: white;
             transform: translateY(-3px);
         }
 
-        .values-section {
+        /* Add cursive font */
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+
+        .cursive-text {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* Update team section styles */
+        .team-section {
+            padding: 60px 0;
             background: #f8f9fa;
-            padding: 80px 0;
-            position: relative;
         }
 
-        .value-card {
+        .team-card {
             background: white;
-            padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            height: 100%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            margin-bottom: 30px;
+            overflow: hidden;
         }
 
-        .value-card:hover {
+        .team-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        .value-icon {
-            width: 70px;
-            height: 70px;
-            background: #ff4757;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            color: white;
+        .team-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .team-info {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .team-info h4 {
+            color: #2d3436;
+            margin-bottom: 5px;
+            font-family: 'Dancing Script', cursive;
             font-size: 1.8rem;
         }
 
-        .stats-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, #2d3436, #636e72);
-            color: white;
+        .team-info p {
+            color: #636e72;
+            margin-bottom: 15px;
         }
 
-        .stat-item {
-            text-align: center;
-            padding: 30px;
-        }
-
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 700;
-            color: #ff4757;
-            margin-bottom: 10px;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .stat-label {
-            font-size: 1.1rem;
-            color: rgba(255,255,255,0.9);
-        }
-
-        @media (max-width: 768px) {
-            .page-header h1 {
-                font-size: 2.5rem;
-            }
-            .stat-number {
-                font-size: 2.5rem;
-            }
-        }
-
-        /* Add Navbar Styles */
-        .navbar {
-            padding: 15px 0;
+        .team-social a {
+            color: #ff6b6b;
+            margin: 0 10px;
+            font-size: 1.2rem;
             transition: all 0.3s ease;
-            background-color: rgba(255, 255, 255, 0.95) !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-        }
-
-        .logo-icon {
-            position: relative;
-            width: 40px;
-            height: 40px;
-            transform-style: preserve-3d;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .logo-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .brand-name {
-            font-size: 24px;
-            font-weight: 700;
-            color: #ff4757;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .brand-slogan {
-            font-size: 12px;
-            color: #2f3542;
-            font-family: 'Dancing Script', cursive;
-            margin-top: -5px;
+        .team-social a:hover {
+            color: #ff5252;
+            transform: translateY(-3px);
         }
     </style>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
@@ -272,17 +292,8 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
         <div class="container">
-            <a class="navbar-brand logo-container" href="/">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 512 512">
-                        <path d="M416 256c0 88.4-71.6 160-160 160S96 344.4 96 256s71.6-160 160-160 160 71.6 160 160zm-80-64c0-44.2-35.8-80-80-80s-80 35.8-80 80 35.8 80 80 80 80-35.8 80-80zm-168 64c0-13.3-10.7-24-24-24s-24 10.7-24 24 10.7 24 24 24 24-10.7 24-24zm248 0c0-13.3-10.7-24-24-24s-24 10.7-24 24 10.7 24 24 24 24-10.7 24-24zM256 432c79.4 0 144-64.6 144-144s-64.6-144-144-144-144 64.6-144 144 64.6 144 144 144z"/>
-                        <circle cx="256" cy="256" r="48" fill="#ff4757"/>
-                    </svg>
-                </div>
-                <div class="logo-text">
-                    <span class="brand-name">Surties</span>
-                    <span class="brand-slogan">sweetshop</span>
-                </div>
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-shop me-2"></i>Surties
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -340,86 +351,126 @@
         </div>
     </nav>
 
-    <!-- Header Section -->
-    <header class="page-header text-center">
-        <div class="container">
-            <h1 class="animate__animated animate__fadeInDown">Our Sweet Story</h1>
-            <p class="animate__animated animate__fadeInUp animate__delay-1s">
-                Discover the rich heritage and passion behind Surties Sweet Shop, where tradition meets innovation in every delightful bite.
-            </p>
+    <!-- Header with cursive -->
+    <header class="about-header text-center">
+        <div class="container position-relative">
+            <h1 class="display-4 mb-4 cursive-text">Our Sweet Journey</h1>
+            <p class="lead cursive-text">Crafting moments of joy since 1990</p>
         </div>
     </header>
 
-    <!-- Story Section -->
-    <section class="story-section">
+    <!-- Stats Section -->
+    <section class="py-5">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0">
-                    <img src="img/about shop.jpg.crdownload" alt="Our Shop" class="img-fluid story-image">
+            <div class="row">
+                <div class="col-md-3 col-sm-6">
+                    <div class="stats-box">
+                        <i class="bi bi-shop"></i>
+                        <h3 class="cursive-text">30+</h3>
+                        <p class="cursive-text">Years of Excellence</p>
+                    </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="story-content">
-                        <h2>A Legacy of Sweetness Since 2020</h2>
-                        <p>What started as a small sweet shop in Surat has blossomed into a beloved destination for authentic Indian sweets. For over three decades, we've been crafting delicious moments and spreading joy through our traditional recipes.</p>
-                        <p>Each sweet in our collection tells a story - of tradition, of innovation, and of our commitment to quality. We take pride in using the finest ingredients and time-honored techniques passed down through generations.</p>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stats-box">
+                        <i class="bi bi-people"></i>
+                        <h3 class="cursive-text">50k+</</h3>
+                        <p class="cursive-text">Happy Customers</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stats-box">
+                        <i class="bi bi-cake2"></i>
+                        <h3 class="cursive-text">100+</</h3>
+                        <p class="cursive-text">Sweet Varieties</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stats-box">
+                        <i class="bi bi-gift"></i>
+                        <h3 class="cursive-text">1M+</</h3>
+                        <p class="cursive-text">Orders Delivered</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Owners Section -->
-    <section class="owners-section py-5">
+    <!-- Improved Timeline -->
+    <section class="timeline py-5">
         <div class="container">
-            <h2 class="text-center mb-5">Meet Our Founders</h2>
-            <div class="row g-4">
-                <div class="col-lg-4">
-                    <div class="owner-card">
-                        <div class="owner-image">
-                            <img src="img/drashti5.jpg" alt="Owner 1" class="img-fluid">
-                        </div>
-                        <div class="owner-info">
-                            <h3>Drashti Adroja</h3>
-                            <p class="position">CEO/CO-FOUNDER</p>
-                            <p class="description">With over 5 years of experience in traditional sweet making, drashti brings expertise and innovation to our recipes.</p>
-                            <div class="social-links">
+            <h2 class="text-center mb-5 cursive-text" style="font-size: 3.5rem;">Our Journey Through Time</h2>
+            <div class="timeline-items">
+                <div class="timeline-item clearfix">
+                    <div class="timeline-content">
+                        <h4>1990</h4>
+                        <p>A small sweet shop in Surat with big dreams, we started our journey with traditional Indian sweets made from cherished family recipes.</p>
+                    </div>
+                </div>
+                <div class="timeline-item clearfix">
+                    <div class="timeline-content">
+                        <h4>2000</h4>
+                        <p>Growing with Gujarat's love, we expanded to multiple locations while keeping our commitment to quality and tradition alive.</p>
+                    </div>
+                </div>
+                <div class="timeline-item clearfix">
+                    <div class="timeline-content">
+                        <h4>2010</h4>
+                        <p>Embracing innovation, we introduced fusion sweets blending Indian traditions with international flavors.</p>
+                    </div>
+                </div>
+                <div class="timeline-item clearfix">
+                    <div class="timeline-content">
+                        <h4>2020</h4>
+                        <p>Taking a digital leap, we brought our sweet delights to your doorstep with online ordering and delivery services.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Replace Team Section with this -->
+    <section class="team-section">
+        <div class="container">
+            <h2 class="text-center mb-5 cursive-text" style="font-size: 3.5rem;">Founders of surties</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="team-card">
+                        <img src="https://img.freepik.com/free-photo/confident-business-man-portrait_144627-46797.jpg" alt="CEO" class="team-image">
+                        <div class="team-info">
+                            <h4>Drashti Adroja</h4>
+                            <p>CEO & Founder</p>
+                            <div class="team-social">
                                 <a href="#"><i class="bi bi-linkedin"></i></a>
-                                <a href="#"><i class="bi bi-instagram"></i></a>
                                 <a href="#"><i class="bi bi-twitter"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4">
-                    <div class="owner-card">
-                        <div class="owner-image">
-                            <img src="img/mihika.jpg" alt="Owner 2" class="img-fluid">
-                        </div>
-                        <div class="owner-info">
-                            <h3>Mihika Padsala</h3>
-                            <p class="position">HEAD OF OPERATIONS</p>
-                            <p class="description">Mihika ensures smooth operations and maintains our high quality standards across all branches.</p>
-                            <div class="social-links">
+                <div class="col-md-4">
+                    <div class="team-card">
+                        <img src="https://img.freepik.com/free-photo/portrait-successful-man-having-stubble-posing-with-broad-smile-keeping-arms-folded_171337-1267.jpg" alt="Co-founder" class="team-image">
+                        <div class="team-info">
+                            <h4>Mihika padsala</h4>
+                            <p>Co-founder</p>
+                            <div class="team-social">
                                 <a href="#"><i class="bi bi-linkedin"></i></a>
-                                <a href="#"><i class="bi bi-instagram"></i></a>
                                 <a href="#"><i class="bi bi-twitter"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4">
-                    <div class="owner-card">
-                        <div class="owner-image">
-                            <img src="img/khushi.jpg" alt="Owner 3" class="img-fluid">
-                        </div>
-                        <div class="owner-info">
-                            <h3>Khushi Vekariya</h3>
-                            <p class="position">CREATIVE DIRECTOR</p>
-                            <p class="description">Khsuhi brings creativity to our traditional sweets, creating unique fusion flavors.</p>
-                            <div class="social-links">
+                <div class="col-md-4">
+                    <div class="team-card">
+                        <img src="https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg" alt="Manager" class="team-image">
+                        <div class="team-info">
+                            <h4>Khushi Vekariyal</h4>
+                            <p>Operations Manager</p>
+                            <div class="team-social">
                                 <a href="#"><i class="bi bi-linkedin"></i></a>
-                                <a href="#"><i class="bi bi-instagram"></i></a>
                                 <a href="#"><i class="bi bi-twitter"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
                             </div>
                         </div>
                     </div>
@@ -429,67 +480,35 @@
     </section>
 
     <!-- Values Section -->
-    <section class="values-section">
+    <section class="py-5">
         <div class="container">
-            <h2 class="text-center mb-5">Our Core Values</h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="bi bi-heart-fill"></i>
-                        </div>
-                        <h4>Quality First</h4>
-                        <p>We never compromise on ingredients or preparation methods, ensuring every sweet meets our high standards.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="bi bi-award-fill"></i>
-                        </div>
-                        <h4>Tradition & Innovation</h4>
-                        <p>Balancing time-honored recipes with modern techniques to create unique taste experiences.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
-                        <h4>Customer Happiness</h4>
-                        <p>Your satisfaction is our priority. We strive to exceed expectations with every interaction.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats-section">
-        <div class="container">
+            <h2 class="text-center mb-5">Our Values</h2>
             <div class="row">
-                <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                        <div class="stat-number">30+</div>
-                        <div class="stat-label">Years of Excellence</div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-heart-fill text-danger display-4 mb-3"></i>
+                            <h4>Quality</h4>
+                            <p>We use only the finest ingredients to create our sweets</p>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                        <div class="stat-number">50+</div>
-                        <div class="stat-label">Sweet Varieties</div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-shield-check text-success display-4 mb-3"></i>
+                            <h4>Hygiene</h4>
+                            <p>Maintaining highest standards of cleanliness</p>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                        <div class="stat-number">100K+</div>
-                        <div class="stat-label">Happy Customers</div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                        <div class="stat-number">5</div>
-                        <div class="stat-label">Store Locations</div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-people-fill text-primary display-4 mb-3"></i>
+                            <h4>Customer First</h4>
+                            <p>Your satisfaction is our top priority</p>
+                        </div>
                     </div>
                 </div>
             </div>

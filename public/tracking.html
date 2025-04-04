@@ -299,18 +299,17 @@
             <div class="timeline-container">
                 <div class="timeline">
                     <div class="timeline-progress" id="timelineProgress"></div>
-                    <input type="hidden" id="currentOrderStatus" value="">
                     <div class="point" data-status="confirmed" style="left: 0%;">
                         <div class="point-label">Confirmed</div>
                         <small id="confirmedTime">--:--</small>
                     </div>
-                    <div class="point" data-status="processing" style="left: 33%;">
+                    <div class="point" data-status="preparing" style="left: 33%;">
                         <div class="point-label">Processing</div>
-                        <small id="processingTime">--:--</small>
+                        <small id="preparingTime">--:--</small>
                     </div>
-                    <div class="point" data-status="out_for_delivery" style="left: 66%;">
+                    <div class="point" data-status="dispatched" style="left: 66%;">
                         <div class="point-label">Out for Delivery</div>
-                        <small id="out_for_deliveryTime">--:--</small>
+                        <small id="dispatchedTime">--:--</small>
                     </div>
                     <div class="point" data-status="delivered" style="left: 100%;">
                         <div class="point-label">Delivered</div>
@@ -450,72 +449,6 @@
                 alert('Geolocation is not supported by your browser');
             }
         }
-
-        // Update the function that handles order tracking
-        async function trackOrderById(event) {
-            if (event) event.preventDefault();
-            
-            const orderId = document.getElementById('trackingPaymentId').value.trim();
-            if (!orderId) return;
-
-            try {
-                // Show loading state
-                document.getElementById('loadingState').style.display = 'block';
-                document.getElementById('trackingContent').style.display = 'none';
-
-                // Fetch order status from server
-                const response = await fetch(`/api/orders/${orderId}`);
-                const orderData = await response.json();
-
-                if (!response.ok) throw new Error('Order not found');
-
-                // Update tracking info
-                document.getElementById('trackingOrderId').textContent = orderId;
-                document.getElementById('orderDate').textContent = new Date(orderData.orderDate).toLocaleString();
-
-                // Start real-time status checking
-                startStatusChecking(orderId);
-
-                // Show tracking content
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('trackingContent').style.display = 'block';
-
-                // Initialize/update map
-                initMap();
-
-            } catch (error) {
-                console.error('Tracking error:', error);
-                showToast('Error tracking order. Please check your order ID.', 'error');
-                document.getElementById('loadingState').style.display = 'none';
-            }
-        }
-
-        // Add real-time updates using setInterval
-        function startStatusPolling(orderId) {
-            return setInterval(() => {
-                if (!document.hidden) { // Only update if page is visible
-                    trackOrderById();
-                }
-            }, 30000); // Poll every 30 seconds
-        }
-
-        // Initialize polling when order is tracked
-        document.getElementById('trackingForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const orderId = document.getElementById('trackingPaymentId').value.trim();
-            trackOrderById();
-            const pollingId = startStatusPolling(orderId);
-            
-            // Store polling ID to clear it later if needed
-            window.currentPolling = pollingId;
-        });
-
-        // Stop polling when page is closed/changed
-        window.addEventListener('beforeunload', () => {
-            if (window.currentPolling) {
-                clearInterval(window.currentPolling);
-            }
-        });
     </script>
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCYpnxWzjIV-N6PnL-0hA_xlb4wcdQljw&callback=initMap">

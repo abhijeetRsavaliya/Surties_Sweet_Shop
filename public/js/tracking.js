@@ -211,33 +211,94 @@ async function trackOrderById(event) {
     const paymentId = input.value.trim();
 
     try {
-        // Fetch order status from server
-        const response = await fetch(`/api/orders/${paymentId}`);
-        if (!response.ok) {
-            throw new Error('Order not found');
+        const orderDetails = JSON.parse(localStorage.getItem(`order_${paymentId}`));
+        if (!orderDetails) {
+            throw new Error('Invalid payment ID. Please check and try again.');
         }
 
-        const orderData = await response.json();
-
-        // Update tracking content
-        document.getElementById('trackingOrderId').textContent = paymentId;
-        document.getElementById('orderDate').textContent = new Date(orderData.orderDate).toLocaleString();
-        document.getElementById('currentOrderStatus').value = orderData.status;
+        showNotification('Order found! Loading tracking details...', 'success');
         document.getElementById('trackingContent').style.display = 'block';
 
-        // Update timeline based on current status
-        updateProgressBar(orderData.status);
-        updateStatusPoints(orderData.status);
+        // Wait for map to be initialized
+        if (!window.googleMap) {
+            await new Promise(resolve => {
+                const checkMap = setInterval(() => {
+                    if (window.googleMap) {
+                        clearInterval(checkMap);
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
 
-        // Start real-time status checking
-        startStatusChecking(paymentId);
+        const map = window.googleMap;
+        const shopLocation = { lat: 21.2192, lng: 72.8836 }; // Savaliya Circle coordinates
 
-        // Initialize/update map
-        initMap();
+        // Get delivery location from order details
+        const geocoder = new google.maps.Geocoder();
+        const fullAddress = `${orderDetails.address}, ${orderDetails.city}, ${orderDetails.state}`;
+        
+        geocoder.geocode({ address: fullAddress }, (results, status) => {
+            if (status === 'OK') {
+                const deliveryLocation = results[0].geometry.location;
+                
+                // Add delivery marker
+                const deliveryMarker = new google.maps.Marker({
+                    position: deliveryLocation,
+                    map: map,
+                    icon: {
+                        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                        scaledSize: new google.maps.Size(40, 40)
+                    },
+                    title: 'Delivery Location',
+                    animation: google.maps.Animation.DROP
+                });
+
+                // Draw route
+                const directionsService = new google.maps.DirectionsService();
+                const directionsRenderer = new google.maps.DirectionsRenderer({
+                    map: map,
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeColor: '#ff4757',
+                        strokeWeight: 5
+                    }
+                });
+
+                directionsService.route({
+                    origin: shopLocation,
+                    destination: deliveryLocation,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }, (response, status) => {
+                    if (status === 'OK') {
+                        directionsRenderer.setDirections(response);
+                        const route = response.routes[0];
+                        document.getElementById('orderDistance').textContent = route.legs[0].distance.text;
+                        document.getElementById('estimatedTime').textContent = route.legs[0].duration.text;
+                        
+                        // Fit map to show entire route
+                        const bounds = new google.maps.LatLngBounds();
+                        bounds.extend(shopLocation);
+                        bounds.extend(deliveryLocation);
+                        map.fitBounds(bounds);
+                    }
+                });
+            }
+        });
+
+        // Update order info
+        document.getElementById('trackingOrderId').textContent = paymentId;
+        document.getElementById('orderDate').textContent = new Date(orderDetails.orderDate).toLocaleString();
+
+        // Update timeline
+        updateOrderTimeline(await getOrderStatus(paymentId));
+
+        // Add refund button
+        addRefundButton(paymentId);
 
     } catch (error) {
         console.error('Tracking error:', error);
-        showNotification('Error: ' + error.message, 'error');
+        showNotification(error.message, 'error');
         document.getElementById('trackingContent').style.display = 'none';
     } finally {
         hideLoading();
@@ -456,113 +517,9 @@ function showNotification(message, type) {
     `;
     toastContainer.appendChild(toast);
 
-    // Remove old toasts
-    const oldToasts = toastContainer.querySelectorAll('.custom-toast');
-    if (oldToasts.length > 3) {
-        oldToasts[0].remove();
-    }
-
     // Remove toast after 3 seconds
     setTimeout(() => {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-
-// Real-time order status tracking
-let currentOrderId = null;
-let statusCheckInterval = null;
-
-async function checkOrderStatus() {
-    if (!currentOrderId) return;
-
-    try {
-        const response = await fetch(`/api/orders/${currentOrderId}`);
-        const orderData = await response.json();
-        
-        if (!response.ok) throw new Error('Order not found');
-
-        // Update the status in hidden input
-        const currentStatusInput = document.getElementById('currentOrderStatus');
-        const prevStatus = currentStatusInput.value;
-        const newStatus = orderData.status;
-
-        if (prevStatus !== newStatus) {
-            currentStatusInput.value = newStatus;
-            updateProgressBar(newStatus);
-            updateStatusPoints(newStatus);
-
-            if (newStatus === 'delivered') {
-                clearInterval(statusCheckInterval);
-                showNotification('Order delivered successfully!', 'success');
-            }
-        }
-
-    } catch (error) {
-        console.error('Status check error:', error);
-        clearInterval(statusCheckInterval);
-    }
-}
-
-function updateProgressBar(status) {
-    const progressMapping = {
-        'confirmed': 0,
-        'processing': 33,
-        'out_for_delivery': 66,
-        'delivered': 100
-    };
-
-    const progressBar = document.getElementById('timelineProgress');
-    if (progressBar) {
-        const progress = progressMapping[status] || 0;
-        progressBar.style.width = `${progress}%`;
-    }
-}
-
-function updateStatusPoints(currentStatus) {
-    const statusOrder = ['confirmed', 'processing', 'out_for_delivery', 'delivered'];
-    const currentIndex = statusOrder.indexOf(currentStatus);
-
-    const points = document.querySelectorAll('.point');
-    points.forEach((point, index) => {
-        const pointStatus = point.dataset.status;
-        
-        // Activate points up to and including current status
-        if (index <= currentIndex) {
-            point.classList.add('active');
-            const timeElement = document.getElementById(`${pointStatus}Time`);
-            if (timeElement && timeElement.textContent === '--:--') {
-                timeElement.textContent = new Date().toLocaleTimeString();
-            }
-        } else {
-            point.classList.remove('active');
-        }
-    });
-}
-
-function startStatusChecking(orderId) {
-    currentOrderId = orderId;
-    
-    // Clear any existing interval
-    if (statusCheckInterval) {
-        clearInterval(statusCheckInterval);
-    }
-    
-    // Check immediately
-    checkOrderStatus();
-    
-    // Then check every 2 seconds
-    statusCheckInterval = setInterval(checkOrderStatus, 2000);
-}
-
-// Clear interval when page is closed/changed
-window.addEventListener('beforeunload', () => {
-    if (statusCheckInterval) {
-        clearInterval(statusCheckInterval);
-    }
-});
-
-// Export functions for use in tracking.html
-window.startStatusChecking = startStatusChecking;
-window.checkOrderStatus = checkOrderStatus;
-window.updateTimeline = updateTimeline;

@@ -31,7 +31,7 @@
         }
 
         .cart-item {
-            border: 2px solid #2f3542;  /* Add black border */
+            border: 1px solid #dee2e6;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 15px;
@@ -42,24 +42,6 @@
         .cart-item:hover {
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transform: translateY(-2px);
-        }
-
-        /* Add new style for discounted items */
-        .cart-item.discounted {
-            border: 2px solid #ff4757;  /* Red border for discounted items */
-        }
-
-        /* Add discount badge */
-        .discount-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #ff4757;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.875rem;
-            font-weight: bold;
         }
 
         .payment-method-select {
@@ -191,9 +173,18 @@
             <div class="col-lg-4">
                 <div class="checkout-section">
                     <h4 class="mb-3">Order Summary</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>₹<span id="subtotal">0</span></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Delivery Fee:</span>
+                        <span>₹50.00</span>
+                    </div>
+                    <hr>
                     <div class="d-flex justify-content-between mb-3">
-                        <span>Total:</span>
-                        <span>₹<span id="total">0</span></span>
+                        <strong>Total:</strong>
+                        <strong>₹<span id="total">0</span></strong>
                     </div>
                     <button id="checkoutButton" class="btn btn-primary w-100 mb-3" onclick="showCheckoutForm()">
                         Proceed to Checkout
@@ -291,13 +282,8 @@
             }
 
             cartItems.innerHTML = cart.map(item => `
-                <div class="cart-item ${item.discount?.isActive ? 'discounted' : ''}">
-                    <div class="d-flex gap-3 position-relative">
-                        ${item.discount?.isActive ? `
-                            <div class="discount-badge">
-                                ${item.discount.percentage}% OFF
-                            </div>
-                        ` : ''}
+                <div class="cart-item">
+                    <div class="d-flex gap-3">
                         <img src="${item.image}" 
                              alt="${item.name}" 
                              class="cart-item-image">
@@ -341,25 +327,19 @@
         }
 
         function calculateItemTotal(item) {
-            if (item.unit === 'kg') {
-                return item.price * (item.weight || 0.25);
-            } else {
-                return item.price * (item.quantity || 1);
-            }
+            return item.price * (item.unit === 'kg' ? item.weight || 0.25 : item.quantity || 1);
         }
 
         function updateTotals() {
             const subtotal = cart.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-            const total = subtotal;
+            const deliveryFee = cart.length > 0 ? 50 : 0;
+            const total = subtotal + deliveryFee;
 
-            // Update subtotal and total displays
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
             document.getElementById('total').textContent = total.toFixed(2);
             
-            // Update checkout button state
+            // Disable/enable checkout button
             document.getElementById('checkoutButton').disabled = cart.length === 0;
-
-            // Store total in localStorage for access during checkout
-            localStorage.setItem('cartTotal', total);
         }
 
         function removeFromCart(itemId) {
@@ -484,16 +464,16 @@
             // Play success sound with full volume
             sound.volume = 1;
             sound.currentTime = 0;
-            sound.play().catch(err => console.log("Sound play failed:", err));
             
-            // Store order ID for tracking
-            localStorage.setItem(`order_${orderId}`, JSON.stringify({
-                id: orderId,
-                date: new Date().toISOString(),
-                address: document.getElementById('userAddress').value,
-                city: document.getElementById('userCity').value,
-                state: document.getElementById('userState').value
-            }));
+            // Force sound to play
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Sound played successfully
+                }).catch(error => {
+                    console.log("Sound play failed:", error);
+                });
+            }
             
             // Update tracking button href
             trackButton.href = `/tracking.html?id=${orderId}`;
@@ -501,7 +481,7 @@
             // Wait 5 seconds before redirecting
             setTimeout(() => {
                 window.location.href = `/tracking.html?id=${orderId}`;
-            }, 5000);
+            }, 5000); // Changed to 5000ms (5 seconds)
         }
 
         function handlePaymentSuccess(response, customerDetails) {
@@ -549,7 +529,7 @@
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
 
             const orderData = {
-                orderId: `COD${Date.now()}`, // This is the COD order ID
+                orderId: `COD${Date.now()}`,
                 userId: JSON.parse(localStorage.getItem('user')).uid,
                 customerDetails: {
                     name: document.getElementById('userName').value,
@@ -575,9 +555,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Generate receipt with COD order ID
+                    // Generate receipt
                     generateReceipt({ 
-                        razorpay_payment_id: orderData.orderId, // Use COD order ID
+                        razorpay_payment_id: orderData.orderId,
                         paymentMethod: 'COD'
                     }, orderData.customerDetails);
                     
@@ -585,7 +565,7 @@
                     cart = [];
                     localStorage.setItem('cart', JSON.stringify(cart));
                     
-                    // Pass COD order ID to success popup
+                    // Show success popup
                     showSuccessPopup(orderData.orderId);
                 } else {
                     throw new Error(data.error);

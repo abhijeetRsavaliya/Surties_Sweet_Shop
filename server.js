@@ -68,9 +68,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use(express.static('public'));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 
-// Update session configuration with secure settings
+// Configure session middleware with more secure settings
 app.use(session({
-    secret: 'admin-secret-key-123',  // Change this to a strong secret
+    secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -80,52 +80,13 @@ app.use(session({
     }
 }));
 
-// Add auth check middleware
-const adminAuth = (req, res, next) => {
-    if (req.session && req.session.isAdminAuthenticated) {
-        next();
-    } else {
-        res.redirect('/admin-login');
-    }
-};
-
 // Add auth check endpoint
-app.get('/check-admin-auth', (req, res) => {
+app.get('/admin-auth-check', (req, res) => {
     if (req.session && req.session.isAdminAuthenticated) {
-        res.json({ authenticated: true });
-    } else {
-        res.json({ authenticated: false });
-    }
-});
-
-// Update admin authentication endpoint
-app.post('/admin-auth', express.json(), (req, res) => {
-    const { adminId, adminPass } = req.body;
-    console.log('Admin auth attempt:', { adminId, adminPass }); // Debug log
-
-    if (adminId === 'admin' && adminPass === 'admin@#123') {
-        req.session.isAdminAuthenticated = true;
         res.json({ success: true });
     } else {
-        res.status(401).json({ 
-            success: false, 
-            error: 'Invalid credentials'
-        });
+        res.status(401).json({ success: false });
     }
-});
-
-// Update admin routes
-app.get('/admin-login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
-});
-
-app.get('/admin', adminAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-app.get('/admin-logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/admin-login');
 });
 
 // Configure multer for image upload
@@ -152,6 +113,39 @@ const upload = multer({
             cb(new Error('Not an image! Please upload an image.'));
         }
     }
+});
+
+// Update admin authentication middleware
+const adminAuth = (req, res, next) => {
+    if (req.session && req.session.isAdminAuthenticated) {
+        next();
+    } else {
+        res.redirect('/admin-login');
+    }
+};
+
+// Update admin routes
+app.get('/admin-login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
+});
+
+app.post('/admin-auth', express.json(), (req, res) => {
+    const { adminId, adminPass } = req.body;
+    if (adminId === 'admin' && adminPass === 'admin@#123') {
+        req.session.isAdminAuthenticated = true;
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ success: false, error: 'Invalid credentials' });
+    }
+});
+
+app.get('/admin', adminAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/admin-logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/admin-login');
 });
 
 app.post('/api/sweets', adminAuth, upload.single('image'), async (req, res) => {
@@ -330,13 +324,9 @@ app.put('/api/orders/:id/status', async (req, res) => {
     try {
         const order = await Order.findByIdAndUpdate(
             req.params.id,
-            { 
-                status: req.body.status,
-                [`statusTimestamps.${req.body.status}`]: new Date()
-            },
+            { status: req.body.status },
             { new: true }
         );
-        
         res.json({ success: true, data: order });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });

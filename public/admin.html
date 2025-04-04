@@ -667,7 +667,7 @@
                 'pending': 'warning',
                 'confirmed': 'info',
                 'processing': 'primary',
-                'out_for_delivery': 'secondary',
+                'shipped': 'secondary',
                 'delivered': 'success',
                 'cancelled': 'danger'
             };
@@ -742,9 +742,9 @@
                             <td>
                                 <select class="form-select form-select-sm" 
                                         onchange="updateOrderStatus('${order._id}', this.value)">
-                                    <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
                                     <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-                                    <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'selected' : ''}>Out for Delivery</option>
+                                    <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
                                     <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                                 </select>
                             </td>
@@ -762,40 +762,6 @@
                         <tr><td colspan="6" class="text-center text-danger">Error loading orders</td></tr>
                     `;
                 });
-        }
-
-        async function updateOrderStatus(orderId, newStatus) {
-            try {
-                const response = await fetch(`/api/orders/${orderId}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Show success message
-                    showNotification('Order status updated successfully', 'success');
-                    
-                    // If order is delivered, reload both active and completed orders
-                    if (newStatus === 'delivered') {
-                        setTimeout(() => {
-                            loadActiveOrders();    // Reload active orders
-                            loadCompletedOrders(); // Reload completed orders
-                        }, 500);
-                    } else {
-                        loadActiveOrders(); // Just reload active orders
-                    }
-                } else {
-                    throw new Error(data.error || 'Failed to update status');
-                }
-            } catch (error) {
-                console.error('Error updating status:', error);
-                showNotification('Failed to update order status', 'error');
-            }
         }
 
         function loadCompletedOrders() {
@@ -868,6 +834,24 @@
                         </tr>
                     `;
                 });
+        }
+
+        function updateOrderStatus(orderId, status) {
+            fetch(`/api/orders/${orderId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (status === 'delivered') {
+                        loadActiveOrders();
+                        loadCompletedOrders();
+                    }
+                }
+            })
+            .catch(error => console.error('Error updating order status:', error));
         }
 
         function confirmDelete(orderId) {
