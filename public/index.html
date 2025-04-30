@@ -1005,6 +1005,109 @@
         .help-widget {
             bottom: 15px;
         }
+
+        .promo-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .promo-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.5s ease;
+        }
+
+        .close-promo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .close-promo:hover {
+            transform: scale(1.1);
+            background: #ff4757;
+            color: white;
+        }
+
+        .promo-slider {
+            width: 100%;
+            position: relative;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .promo-details {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .promo-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .promo-price {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .buy-now-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .buy-now-btn:hover {
+            transform: scale(1.05);
+            background: #ff2e44;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
     </style>
     <!-- Add Razorpay Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -1112,6 +1215,69 @@
             </div>
         </div>
     </nav>
+
+    <!-- Update the promo popup content -->
+    <div class="promo-popup" id="promoPopup">
+        <div class="promo-content">
+            <button class="close-promo" onclick="closePromoPopup()">×</button>
+            <div class="promo-slider">
+                <div id="promoCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner" id="promoItems">
+                        <!-- Items will be loaded here -->
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Payment Form Modal -->
+    <div class="modal fade" id="promoPaymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Complete Purchase</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="promoPaymentForm">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="promoName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="promoEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="promoPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" id="promoAddress" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" id="promoCity" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">State</label>
+                                <input type="text" class="form-control" id="promoState" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Proceed to Payment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section id="home" class="hero-section">
@@ -1509,6 +1675,187 @@
         document.addEventListener('DOMContentLoaded', () => {
             // ...existing DOMContentLoaded code...
             window.loadOffers(); // Load offers on page load
+        });
+
+        async function loadPromoItems() {
+            try {
+                const response = await fetch('/api/advertisements');
+                const data = await response.json();
+                
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    const promoItems = document.getElementById('promoItems');
+                    promoItems.innerHTML = data.data.map((item, index) => `
+                        <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                            <img src="${item.image}" alt="${item.title}">
+                            <div class="promo-details">
+                                <h3 class="promo-title">${item.title}</h3>
+                                <div class="promo-price">
+                                    <span class="original-price text-decoration-line-through">₹${item.originalPrice}</span>
+                                    <span class="offer-price ms-2">₹${item.offerPrice}</span>
+                                </div>
+                                <button class="buy-now-btn" onclick="buyPromoItem(${JSON.stringify(item)})">
+                                    Buy Now
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // Show popup
+                    const popup = document.getElementById('promoPopup');
+                    popup.style.display = 'flex';
+                    popup.style.opacity = '1';
+
+                    // Add escape key listener
+                    document.addEventListener('keydown', function(event) {
+                        if (event.key === 'Escape') {
+                            closePromoPopup();
+                        }
+                    });
+
+                    // Add click outside listener
+                    popup.addEventListener('click', function(event) {
+                        if (event.target === popup) {
+                            closePromoPopup();
+                        }
+                    });
+
+                    // Initialize carousel
+                    new bootstrap.Carousel(document.getElementById('promoCarousel'), {
+                        interval: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading promo items:', error);
+            }
+        }
+
+        function closePromoPopup() {
+            const popup = document.getElementById('promoPopup');
+            if (popup) {
+                popup.style.opacity = '0';
+                popup.style.display = 'none';
+            }
+        }
+
+        let currentPromoItem = null;
+
+        function buyPromoItem(item) {
+            currentPromoItem = item;
+            
+            // Check if user is logged in
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                window.location.href = '/auth.html?redirect=home';
+                return;
+            }
+
+            // Show payment modal
+            const modal = new bootstrap.Modal(document.getElementById('promoPaymentModal'));
+            modal.show();
+
+            // Pre-fill user data if available
+            const user = JSON.parse(userData);
+            document.getElementById('promoName').value = user.displayName || '';
+            document.getElementById('promoEmail').value = user.email || '';
+        }
+
+        // Handle payment form submission
+        document.getElementById('promoPaymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+
+            try {
+                const options = {
+                    key: 'rzp_live_1ZlF3tPntMSkxX', // Replace with your Razorpay key
+                    amount: Math.round(currentPromoItem.offerPrice * 100),
+                    currency: 'INR',
+                    name: 'Surties Sweet Shop',
+                    description: currentPromoItem.title,
+                    prefill: {
+                        name: document.getElementById('promoName').value,
+                        email: document.getElementById('promoEmail').value,
+                        contact: document.getElementById('promoPhone').value
+                    },
+                    notes: {
+                        address: document.getElementById('promoAddress').value,
+                        city: document.getElementById('promoCity').value,
+                        state: document.getElementById('promoState').value
+                    },
+                    handler: function(response) {
+                        handlePromoPaymentSuccess(response);
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Payment initialization failed. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Proceed to Payment';
+            }
+        });
+
+        async function handlePromoPaymentSuccess(response) {
+            try {
+                const orderData = {
+                    orderId: `ORD${Date.now()}`,
+                    userId: JSON.parse(localStorage.getItem('user')).uid,
+                    customerDetails: {
+                        name: document.getElementById('promoName').value,
+                        email: document.getElementById('promoEmail').value,
+                        phone: document.getElementById('promoPhone').value,
+                        address: document.getElementById('promoAddress').value,
+                        city: document.getElementById('promoCity').value,
+                        state: document.getElementById('promoState').value
+                    },
+                    items: [{
+                        _id: currentPromoItem._id,
+                        name: currentPromoItem.title,
+                        price: currentPromoItem.offerPrice,
+                        quantity: 1,
+                        image: currentPromoItem.image
+                    }],
+                    totalAmount: currentPromoItem.offerPrice,
+                    paymentMethod: 'prepaid',
+                    paymentId: response.razorpay_payment_id,
+                    status: 'confirmed',
+                    orderDate: new Date().toISOString()
+                };
+
+                const orderResponse = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                const orderResult = await orderResponse.json();
+                
+                if (orderResult.success) {
+                    // Close both modals
+                    bootstrap.Modal.getInstance(document.getElementById('promoPaymentModal')).hide();
+                    closePromoPopup();
+                    
+                    // Show success message and redirect
+                    alert('Order placed successfully!');
+                    window.location.href = `/tracking.html?id=${response.razorpay_payment_id}`;
+                } else {
+                    throw new Error(orderResult.error);
+                }
+            } catch (error) {
+                console.error('Order error:', error);
+                alert('Error saving order. Please contact support.');
+            }
+        }
+
+        // Show popup on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Delay popup by 1 second
+            setTimeout(loadPromoItems, 1000);
         });
     </script>
 </body>
