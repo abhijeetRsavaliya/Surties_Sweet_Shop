@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special Offers - Surties Sweet Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        .offers-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa502 100%);
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .offers-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/img/pattern.png');
+            opacity: 0.1;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+        }
+
+        .header-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: fadeInUp 1s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .header-content p {
+            animation: fadeInUp 1s ease-out 0.3s;
+            animation-fill-mode: both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .offer-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            position: relative;
+            height: 100%;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .offer-image-container {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .offer-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .offer-card:hover .offer-image {
+            transform: scale(1.1);
+        }
+
+        .offer-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #FF416C;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255,65,108,0.3);
+            z-index: 1;
+        }
+
+        .offer-content {
+            padding: 25px;
+            background: white;
+            position: relative;
+        }
+
+        .price-section {
+            margin-bottom: 20px;  /* Add more space below prices */
+            padding: 10px 0;      /* Add vertical padding */
+            border-bottom: 1px solid #eee;  /* Add separator line */
+        }
+
+        .original-price {
+            font-size: 1.1rem;
+            color: #999;
+        }
+
+        .offer-price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-left: 15px;
+        }
+
+        .offer-cta {
+            margin-top: 15px;    /* Add space above button */
+            width: 100%;         /* Make button full width */
+            padding: 12px 20px;  /* Make button taller */
+        }
+
+        .validity {
+            font-size: 0.9rem;
+            color: #636e72;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #FF416C;
+            margin-bottom: 20px;
+        }
+
+        .nav-link {
+            color: #2d3436;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #FF416C;
+        }
+
+        @media (max-width: 768px) {
+            .offers-header {
+                padding: 80px 0;
+            }
+
+            .header-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .offer-card {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <!-- Copy navbar from index.html -->
+    </nav>
+
+    <!-- Header Section -->
+    <header class="offers-header">
+        <div class="header-content">
+            <h1>Special Offers</h1>
+            <p class="lead">Discover amazing deals on your favorite sweets</p>
+        </div>
+    </header>
+
+    <!-- Offers Section -->
+    <section class="container py-5">
+        <div id="offersList" class="row">
+            <!-- Offers will be loaded here -->
+            <div class="text-center w-100">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function loadOffers() {
+            try {
+                const response = await fetch('/api/advertisements');
+                const data = await response.json();
+                
+                const offersList = document.getElementById('offersList');
+                if (!offersList) return;
+
+                if (data.success && Array.isArray(data.data)) {
+                    if (data.data.length === 0) {
+                        offersList.innerHTML = `
+                            <div class="col-12">
+                                <div class="empty-state">
+                                    <i class="bi bi-tag"></i>
+                                    <h3>No Offers Available</h3>
+                                    <p>Check back later for exciting deals!</p>
+                                    <a href="/" class="btn offer-cta mt-3">Browse Products</a>
+                                </div>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    offersList.innerHTML = data.data.map(offer => `
+                        <div class="col-lg-4 col-md-6">
+                            <div class="offer-card">
+                                <div class="offer-image-container">
+                                    <img src="${offer.image}" class="offer-image" alt="${offer.title}">
+                                    <div class="offer-badge">
+                                        ${Math.round(((offer.originalPrice - offer.offerPrice) / offer.originalPrice) * 100)}% OFF
+                                    </div>
+                                </div>
+                                <div class="offer-content">
+                                    <h3 class="offer-title">${offer.title}</h3>
+                                    <p class="offer-description">${offer.description}</p>
+                                    <div class="price-section d-flex align-items-center justify-content-center">
+                                        <span class="original-price">₹${offer.originalPrice}</span>
+                                        <span class="offer-price">₹${offer.offerPrice}</span>
+                                    </div>
+                                    <button class="btn offer-cta" 
+                                            onclick="addToCartOffer('${offer._id}', '${offer.title}', ${offer.offerPrice}, '${offer.image}')">
+                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                    </button>
+                                    <p class="validity">
+                                        <i class="bi bi-clock"></i>
+                                        Valid until: ${new Date(offer.validUntil).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading offers:', error);
+                document.getElementById('offersList').innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger text-center">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Failed to load offers. Please try again later.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function addToCartOffer(id, name, price, image) {
+            try {
+                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                
+                const existingItem = cart.find(item => item._id === id);
+                
+                if (existingItem) {
+                    existingItem.quantity = (existingItem.quantity || 1) + 1;
+                } else {
+                    cart.push({
+                        _id: id,
+                        name: name,
+                        price: price,
+                        image: image,
+                        quantity: 1
+                    });
+                }
+                
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                alert('Item added to cart successfully!');
+                
+                if (typeof updateCartCount === 'function') {
+                    updateCartCount();
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Failed to add item to cart. Please try again.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadOffers);
+    </script>
+</body>
+</html>

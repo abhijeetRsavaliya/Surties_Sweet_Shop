@@ -181,6 +181,19 @@
                 window.location.href = '/admin';
             }
         })();
+
+        // Add this function at the top of your script section
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
     </script>
 
     <div class="admin-container">
@@ -203,6 +216,21 @@
                 <li>
                     <a href="#" onclick="showTab('completed-orders')">
                         <i class="bi bi-check2-circle"></i> Completed Orders
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showPanel('coupons')">
+                        <i class="bi bi-tag"></i> Discount Coupons
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showPanel('coupons')">
+                        <i class="bi bi-ticket-perforated"></i> Discount Coupons
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showTab('advertisements')">
+                        <i class="bi bi-megaphone"></i> Advertisements
                     </a>
                 </li>
             </ul>
@@ -344,6 +372,156 @@
                             </thead>
                             <tbody id="completedOrdersList"></tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discount Coupons Panel -->
+            <div id="couponsPanel" class="admin-panel" style="display: none;">
+                <h2>Manage Discount Coupons</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Create New Coupon</h5>
+                                <form id="couponForm" onsubmit="createCoupon(event)">
+                                    <div class="mb-3">
+                                        <label class="form-label">Coupon Code</label>
+                                        <input type="text" class="form-control" name="code" 
+                                               pattern="[A-Z0-9]{5}" required
+                                               placeholder="5 characters (A-Z, 0-9)">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Discount Percentage</label>
+                                        <input type="number" class="form-control" name="discountPercent"
+                                               min="5" max="50" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Valid Until</label>
+                                        <input type="date" class="form-control" name="validUntil" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Max Uses</label>
+                                        <input type="number" class="form-control" name="maxUses"
+                                               min="1" value="1" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Create Coupon</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Discount</th>
+                                <th>Valid Until</th>
+                                <th>Uses</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="couponsList"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Add Coupon Modal -->
+            <div class="modal fade" id="addCouponModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Coupon</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addCouponForm" onsubmit="handleAddCoupon(event)">
+                                <div class="mb-3">
+                                    <label class="form-label">Coupon Code (Optional)</label>
+                                    <input type="text" class="form-control" name="code" 
+                                           pattern="[A-Z0-9]{5}" 
+                                           placeholder="Leave blank for auto-generate">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Discount Percentage</label>
+                                    <input type="number" class="form-control" name="discountPercent"
+                                           min="5" max="50" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Valid Until</label>
+                                    <input type="date" class="form-control" name="validUntil" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Maximum Uses</label>
+                                    <input type="number" class="form-control" name="maxUses"
+                                           min="1" value="1" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Create Coupon</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advertisements Tab -->
+            <div id="advertisements" class="tab-content">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Manage Advertisements</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="advertisementForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label">Title</label>
+                                <input type="text" class="form-control" name="title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="description" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Image</label>
+                                <input type="file" class="form-control" name="image" accept="image/*" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Original Price (₹)</label>
+                                        <input type="number" class="form-control" name="originalPrice" id="originalPrice" 
+                                               min="0" step="0.01" required onchange="calculateFinalPrice()">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Discount (%)</label>
+                                        <input type="number" class="form-control" name="discountPercent" id="discountPercent" 
+                                               min="0" max="100" value="0" required onchange="calculateFinalPrice()">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Final Price (₹)</label>
+                                        <input type="number" class="form-control" name="offerPrice" id="offerPrice" 
+                                               readonly style="background-color: #f8f9fa;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Valid Until</label>
+                                <input type="datetime-local" class="form-control" name="validUntil" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Advertisement</button>
+                        </form>
+
+                        <!-- Add a section to display existing advertisements -->
+                        <div class="mt-4">
+                            <h6 class="mb-3">Existing Advertisements</h6>
+                            <div id="advertisementsList" class="row g-3"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -693,30 +871,31 @@
             }
         }
 
-        // Update the initial load to include orders
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSweets();
-            loadOrders();
-        });
-
         // Add these new functions
         function showTab(tabId) {
-            // Hide all tabs
+            // Hide all tab contents
             document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
                 tab.classList.remove('active');
             });
             
             // Show selected tab
-            document.getElementById(tabId).classList.add('active');
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.style.display = 'block';
+                selectedTab.classList.add('active');
+            }
             
-            // Update menu active state
+            // Update sidebar menu active state
             document.querySelectorAll('.sidebar-menu a').forEach(link => {
                 link.classList.remove('active');
             });
             event.currentTarget.classList.add('active');
 
-            // Load appropriate data
-            if (tabId === 'active-orders') {
+            // Load appropriate data based on tab
+            if (tabId === 'advertisements') {
+                loadAdvertisements();
+            } else if (tabId === 'active-orders') {
                 loadActiveOrders();
             } else if (tabId === 'completed-orders') {
                 loadCompletedOrders();
@@ -908,6 +1087,9 @@
 
         // Update initialization
         document.addEventListener('DOMContentLoaded', () => {
+            // Show products tab by default
+            showTab('products');
+            
             // Initialize tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
@@ -916,6 +1098,8 @@
             loadSweets();
             loadActiveOrders();
             loadCompletedOrders();
+            loadCoupons();
+            loadAdvertisements();
         });
 
         // Add logout function
@@ -923,6 +1107,344 @@
             localStorage.removeItem('adminId');
             localStorage.removeItem('adminPass');
             window.location.href = '/admin';
+        }
+
+        // Add coupon functions
+        function createCoupon(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = Object.fromEntries(new FormData(form));
+            
+            fetch('/api/coupons', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    form.reset();
+                    loadCoupons();
+                    showNotification('Coupon created successfully!', 'success');
+                } else {
+                    throw new Error(data.error);
+                }
+            })
+            .catch(err => {
+                showNotification('Error creating coupon: ' + err.message, 'danger');
+            });
+        }
+
+        function loadCoupons() {
+            fetch('/api/coupons')
+                .then(res => res.json())
+                .then(coupons => {
+                    const tbody = document.getElementById('couponsList');
+                    tbody.innerHTML = coupons.map(coupon => `
+                        <tr>
+                            <td>${coupon.code}</td>
+                            <td>${coupon.discountPercent}%</td>
+                            <td>${new Date(coupon.validUntil).toLocaleDateString()}</td>
+                            <td>${coupon.currentUses}/${coupon.maxUses}</td>
+                            <td>
+                                <span class="badge bg-${new Date() < new Date(coupon.validUntil) ? 'success' : 'danger'}">
+                                    ${new Date() < new Date(coupon.validUntil) ? 'Active' : 'Expired'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCoupon('${coupon._id}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                });
+        }
+
+        function deleteCoupon(id) {
+            if (confirm('Are you sure you want to delete this coupon?')) {
+                fetch(`/api/coupons/${id}`, { method: 'DELETE' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadCoupons();
+                            showNotification('Coupon deleted successfully!', 'success');
+                        } else {
+                            throw new Error(data.error);
+                        }
+                    })
+                    .catch(err => {
+                        showNotification('Error deleting coupon: ' + err.message, 'danger');
+                    });
+            }
+        }
+
+        function showAddCouponModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addCouponModal'));
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.querySelector('input[name="validUntil"]').min = tomorrow.toISOString().split('T')[0];
+            modal.show();
+        }
+
+        async function handleAddCoupon(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/api/coupons', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(Object.fromEntries(formData))
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    loadCoupons();
+                    bootstrap.Modal.getInstance(document.getElementById('addCouponModal')).hide();
+                    showToast('Coupon created successfully', 'success');
+                    form.reset();
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                showToast('Error creating coupon: ' + error.message, 'error');
+            }
+        }
+
+        function isValid(coupon) {
+            return new Date(coupon.validUntil) > new Date() && 
+                   coupon.currentUses < coupon.maxUses;
+        }
+
+        // Add advertisement functions
+        async function handleAdvertisementSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const formData = new FormData(form);
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
+
+                // Basic validation
+                if (!formData.get('title') || !formData.get('image')) {
+                    throw new Error('Please fill all required fields');
+                }
+
+                const response = await fetch('/api/advertisements', {
+                    method: 'POST',
+                    body: formData // FormData handles multipart/form-data automatically
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Clear form and close modal
+                    form.reset();
+                    bootstrap.Modal.getInstance(document.getElementById('addAdvertisementModal')).hide();
+                    
+                    // Refresh advertisements list
+                    loadAdvertisements();
+                    showAlert('Advertisement added successfully', 'success');
+                } else {
+                    throw new Error(data.error || 'Failed to add advertisement');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message, 'danger');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Add Advertisement';
+            }
+        }
+
+        async function loadAdvertisements() {
+            try {
+                console.log('Loading advertisements...');
+                const advertisementsList = document.getElementById('advertisementsList');
+                if (!advertisementsList) return;
+
+                // Show loading state
+                advertisementsList.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
+
+                const response = await fetch('/api/advertisements');
+                const data = await response.json();
+                console.log('Received advertisements:', data);
+
+                if (data.success && Array.isArray(data.data)) {
+                    if (data.data.length === 0) {
+                        advertisementsList.innerHTML = '<div class="col-12"><p class="text-center text-muted">No advertisements found</p></div>';
+                        return;
+                    }
+
+                    advertisementsList.innerHTML = data.data.map(ad => `
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <img src="${ad.image}" class="card-img-top" alt="${ad.title}" 
+                                     style="height: 200px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h6 class="card-title">${ad.title}</h6>
+                                    <p class="card-text small">${ad.description}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="text-decoration-line-through">₹${ad.originalPrice}</span>
+                                            <span class="text-danger ms-2">₹${ad.offerPrice}</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteAdvertisement('${ad._id}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    throw new Error('Invalid data format received from server');
+                }
+            } catch (error) {
+                console.error('Error loading advertisements:', error);
+                const advertisementsList = document.getElementById('advertisementsList');
+                if (advertisementsList) {
+                    advertisementsList.innerHTML = '<div class="col-12"><div class="alert alert-danger">Error loading advertisements</div></div>';
+                }
+            }
+        }
+
+        function deleteAdvertisement(id) {
+            if (confirm('Are you sure you want to delete this advertisement?')) {
+                fetch(`/api/advertisements/${id}`, { method: 'DELETE' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadAdvertisements();
+                            showAlert('Advertisement deleted successfully', 'success');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting advertisement:', error);
+                        showAlert('Error deleting advertisement', 'danger');
+                    });
+            }
+        }
+
+        function showAddAdvertisementModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addAdvertisementModal'));
+            modal.show();
+        }
+
+        function calculateFinalPrice() {
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value) || 0;
+            const discountPercent = parseFloat(document.getElementById('discountPercent').value) || 0;
+            
+            if (originalPrice > 0 && discountPercent >= 0 && discountPercent <= 100) {
+                const finalPrice = originalPrice * (1 - discountPercent / 100);
+                document.getElementById('offerPrice').value = finalPrice.toFixed(2);
+            } else {
+                document.getElementById('offerPrice').value = originalPrice.toFixed(2);
+            }
+        }
+
+        document.getElementById('advertisementForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
+
+                const formData = new FormData(form);
+                
+                // Ensure final price is calculated and included
+                const originalPrice = parseFloat(formData.get('originalPrice')) || 0;
+                const discountPercent = parseFloat(formData.get('discountPercent')) || 0;
+                const finalPrice = originalPrice * (1 - discountPercent / 100);
+                formData.set('offerPrice', finalPrice.toFixed(2));
+
+                console.log('Submitting advertisement data...', Object.fromEntries(formData));
+
+                const response = await fetch('/api/advertisements', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log('Server response:', result);
+                
+                if (result.success) {
+                    showAlert('Advertisement added successfully!', 'success');
+                    form.reset();
+                    document.getElementById('offerPrice').value = '';
+                    
+                    // Wait a moment before reloading advertisements
+                    setTimeout(() => {
+                        loadAdvertisements();
+                    }, 500);
+                } else {
+                    throw new Error(result.error || 'Failed to add advertisement');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message, 'danger');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Add Advertisement';
+            }
+        });
+
+        async function loadAdvertisements() {
+            try {
+                console.log('Loading advertisements...');
+                const advertisementsList = document.getElementById('advertisementsList');
+                if (!advertisementsList) return;
+
+                // Show loading state
+                advertisementsList.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
+
+                const response = await fetch('/api/advertisements');
+                const data = await response.json();
+                console.log('Received advertisements:', data);
+
+                if (data.success && Array.isArray(data.data)) {
+                    if (data.data.length === 0) {
+                        advertisementsList.innerHTML = '<div class="col-12"><p class="text-center text-muted">No advertisements found</p></div>';
+                        return;
+                    }
+
+                    advertisementsList.innerHTML = data.data.map(ad => `
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <img src="${ad.image}" class="card-img-top" alt="${ad.title}" 
+                                     style="height: 200px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h6 class="card-title">${ad.title}</h6>
+                                    <p class="card-text small">${ad.description}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="text-decoration-line-through">₹${ad.originalPrice}</span>
+                                            <span class="text-danger ms-2">₹${ad.offerPrice}</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteAdvertisement('${ad._id}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    throw new Error('Invalid data format received from server');
+                }
+            } catch (error) {
+                console.error('Error loading advertisements:', error);
+                const advertisementsList = document.getElementById('advertisementsList');
+                if (advertisementsList) {
+                    advertisementsList.innerHTML = '<div class="col-12"><div class="alert alert-danger">Error loading advertisements</div></div>';
+                }
+            }
         }
     </script>
 </body>

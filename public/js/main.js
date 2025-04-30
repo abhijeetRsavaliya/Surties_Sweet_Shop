@@ -1322,3 +1322,83 @@ async function submitHelpRequest(event) {
 window.toggleHelpForm = toggleHelpForm;
 window.toggleBankDetails = toggleBankDetails;
 window.submitHelpRequest = submitHelpRequest;
+
+// Offer panel functionality
+function toggleOffersPanel() {
+    const panel = document.getElementById('offersPanel');
+    if (panel) {
+        panel.classList.toggle('active');
+        if (panel.classList.contains('active')) {
+            loadOffers();
+        }
+    }
+}
+
+function loadOffers() {
+    const offersList = document.getElementById('offersList');
+    if (!offersList) return;
+
+    offersList.innerHTML = '<div class="text-center"><div class="spinner-border text-primary"></div></div>';
+
+    fetch('/api/advertisements')
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received offers data:', data); // Debug log
+            
+            if (!data.success || !Array.isArray(data.data)) {
+                throw new Error('Invalid data format');
+            }
+
+            const activeOffers = data.data.filter(ad => 
+                ad.isActive && new Date(ad.validUntil) > new Date()
+            );
+
+            if (activeOffers.length === 0) {
+                offersList.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="bi bi-exclamation-circle fs-1"></i>
+                        <p class="mt-2">No active offers available</p>
+                    </div>`;
+                return;
+            }
+
+            offersList.innerHTML = activeOffers.map(ad => `
+                <div class="offer-card">
+                    <img src="${ad.image}" alt="${ad.title}" class="offer-image">
+                    <div class="offer-title">${ad.title}</div>
+                    <div class="offer-price">
+                        <span class="original-price">₹${ad.originalPrice}</span>
+                        <span class="offer-price-new">₹${ad.offerPrice}</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm w-100" 
+                            onclick='addToCart(${JSON.stringify({
+                                _id: ad._id,
+                                name: ad.title,
+                                price: ad.offerPrice,
+                                image: ad.image,
+                                quantity: 1
+                            })})'>
+                        Add to Cart
+                    </button>
+                </div>
+            `).join('');
+        })
+        .catch(error => {
+            console.error('Error loading offers:', error);
+            offersList.innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="bi bi-exclamation-triangle fs-1"></i>
+                    <p class="mt-2">Error loading offers</p>
+                    <button class="btn btn-outline-danger btn-sm mt-2" onclick="loadOffers()">
+                        <i class="bi bi-arrow-clockwise"></i> Retry
+                    </button>
+                </div>`;
+        });
+}
+
+// Make functions globally accessible
+window.toggleOffersPanel = toggleOffersPanel;
+window.loadOffers = loadOffers;

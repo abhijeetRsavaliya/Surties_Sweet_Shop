@@ -6,6 +6,7 @@ const Sweet = require('./models/Sweet');
 const fs = require('fs');
 const Order = require('./models/Order');
 const HelpRequest = require('./models/HelpRequest');
+const Advertisement = require('./models/Advertisement');
 const session = require('express-session');
 const { sendHelpRequestEmail } = require('./services/mailService');
 const fsPromises = require('fs').promises;
@@ -260,14 +261,6 @@ app.post('/api/orders', async (req, res) => {
     try {
         const orderData = req.body;
         
-        // Validate required fields
-        if (!orderData.customerDetails || !orderData.items || !orderData.totalAmount) {
-            return res.status(400).json({
-                success: false,
-                error: 'Missing required order details'
-            });
-        }
-
         // Create new order
         const newOrder = new Order({
             ...orderData,
@@ -276,8 +269,6 @@ app.post('/api/orders', async (req, res) => {
         });
 
         const savedOrder = await newOrder.save();
-        
-        // Send order confirmation email here if needed
         
         res.status(201).json({
             success: true,
@@ -399,6 +390,16 @@ app.get('/contact.html', (req, res) => {
 // Add new route for favorites page
 app.get('/favorites.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'favorites.html'));
+});
+
+// Add new route for offers page
+app.get('/offers', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'offers.html'));
+});
+
+// Add new route for offers page
+app.get('/offers-page', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'offers-page.html'));
 });
 
 // Create help requests directory if it doesn't exist
@@ -604,6 +605,91 @@ app.post('/api/refund/:orderId', async (req, res) => {
         res.json({ success: true, message: 'Refund processed successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Update advertisement routes with better error handling
+app.get('/api/advertisements', async (req, res) => {
+    try {
+        console.log('Fetching advertisements...');
+        const ads = await Advertisement.find({ isActive: true });
+        console.log('Found advertisements:', ads);
+        res.json({
+            success: true,
+            data: ads
+        });
+    } catch (error) {
+        console.error('Error fetching advertisements:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch advertisements'
+        });
+    }
+});
+
+app.post('/api/advertisements', upload.single('image'), async (req, res) => {
+    try {
+        console.log('Received advertisement request:', req.body); // Debug log
+        
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: 'Image is required'
+            });
+        }
+
+        const { title, description, originalPrice, offerPrice, validUntil } = req.body;
+
+        // Validate required fields
+        if (!title || !description || !originalPrice || !offerPrice || !validUntil) {
+            return res.status(400).json({
+                success: false,
+                error: 'All fields are required'
+            });
+        }
+
+        const newAd = new Advertisement({
+            title,
+            description,
+            image: `/uploads/${req.file.filename}`,
+            originalPrice: parseFloat(originalPrice),
+            offerPrice: parseFloat(offerPrice),
+            validUntil: new Date(validUntil),
+            isActive: true
+        });
+
+        console.log('Creating new advertisement:', newAd); // Debug log
+
+        const savedAd = await newAd.save();
+        res.status(201).json({
+            success: true,
+            data: savedAd
+        });
+    } catch (error) {
+        console.error('Error creating advertisement:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create advertisement: ' + error.message
+        });
+    }
+});
+
+app.delete('/api/advertisements/:id', adminAuth, async (req, res) => {
+    try {
+        const ad = await Advertisement.findById(req.params.id);
+        if (!ad) {
+            return res.status(404).json({ success: false, error: 'Advertisement not found' });
+        }
+
+        const imagePath = path.join(__dirname, 'public', ad.image);
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
+
+        await Advertisement.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'Advertisement deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 

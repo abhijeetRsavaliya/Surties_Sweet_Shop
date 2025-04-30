@@ -252,6 +252,11 @@
                     <i class="bi bi-geo-alt me-2"></i>Track Order
                 </a>
             </div>
+            
+            <!-- Add Done button -->
+            <button class="done-button" onclick="handleDone()">
+                <i class="bi bi-check2-circle me-2"></i>Done
+            </button>
         </div>
     </div>
 
@@ -454,27 +459,19 @@
             // Show popup
             popup.classList.add('active');
             
-            // Play success sound with full volume
+            // Play success sound
             sound.volume = 1;
             sound.currentTime = 0;
-            
-            // Force sound to play
-            const playPromise = sound.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    // Sound played successfully
-                }).catch(error => {
-                    console.log("Sound play failed:", error);
-                });
-            }
+            sound.play().catch(error => console.log("Sound play failed:", error));
             
             // Update tracking button href
             trackButton.href = `/tracking.html?id=${orderId}`;
-            
-            // Wait 5 seconds before redirecting
-            setTimeout(() => {
-                window.location.href = `/tracking.html?id=${orderId}`;
-            }, 5000); // Changed to 5000ms (5 seconds)
+        }
+
+        // Add new function to handle Done button click
+        function handleDone() {
+            const trackButton = document.getElementById('trackOrderButton');
+            window.location.href = trackButton.href;
         }
 
         function handlePaymentSuccess(response, customerDetails) {
@@ -490,7 +487,6 @@
                 orderDate: new Date().toISOString()
             };
 
-            // Save order to database
             fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -499,12 +495,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Generate receipt
                     generateReceipt(response, customerDetails);
-                    // Clear cart
                     cart = [];
                     localStorage.setItem('cart', JSON.stringify(cart));
-                    // Show success popup
                     showSuccessPopup(response.razorpay_payment_id);
                 } else {
                     throw new Error(data.error);
