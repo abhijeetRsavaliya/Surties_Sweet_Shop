@@ -5,297 +5,296 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - Surties Sweet Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
-        .about-header {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ffa502 100%);
-            padding: 100px 0 50px;
-            color: white;
-            position: relative;
-            overflow: hidden;
+        /* Add these new logo styles at the top of your existing styles */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0;
         }
 
-        .about-header::before {
+        .logo-icon {
+            width: 60px !important; /* Increased from 40px */
+            height: 60px !important; /* Increased from 40px */
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .brand-name {
+            font-size: 32px !important; /* Increased from 24px */
+            font-weight: 700;
+            color: #ff4757;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .brand-slogan {
+            font-size: 14px !important; /* Increased from 12px */
+            color: #2f3542;
+            font-family: 'Dancing Script', cursive;
+            margin-top: -5px;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background-color: #f8f9fa;
+        }
+
+        .navbar-brand {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.8rem;
+            color: #ff4757;
+        }
+
+        .navbar-nav .nav-link {
+            font-size: 1rem;
+            color: #2d3436;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #ff4757;
+        }
+
+        .navbar-toggler-icon {
+            background-color: #ff4757;
+        }
+
+        /* Updated About Hero Section styles */
+        .about-hero {
+            min-height: 60vh;
+            background: #ff4757;
+            position: relative;
+            padding: 100px 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .about-hero::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('https://img.freepik.com/free-photo/indian-sweets-mithai-diwali-celebration_76158-534.jpg');
-            background-size: cover;
+            background: url('https://img.freepik.com/free-photo/traditional-indian-sweets-rustic-wooden-background_185193-8083.jpg') center/cover;
             opacity: 0.1;
+            animation: scale 20s infinite alternate;
         }
 
-        .timeline {
+        @keyframes scale {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .about-hero-content {
             position: relative;
-            max-width: 1200px;
+            z-index: 2;
+        }
+
+        .about-hero h1 {
+            font-size: 5rem;
+            font-family: 'Dancing Script', cursive;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+            animation: slideDown 1s ease;
+        }
+
+        .about-hero p {
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.9);
+            max-width: 600px;
             margin: 0 auto;
-            padding: 30px 0;  /* Reduced padding */
+            animation: slideUp 1s ease;
         }
 
-        .timeline::before {
-            content: '';
-            position: absolute;
-            width: 6px;
-            height: 70%;  /* Reduced height */
-            background: linear-gradient(to bottom, #ff6b6b, #ffa502);
-            top: 15%;    /* Center vertically */
-            left: 50%;
-            margin-left: -3px;
-            border-radius: 3px;
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .timeline-item {
-            margin-bottom: 50px;
-            position: relative;
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .timeline-content {
-            padding: 30px;
+        /* Updated Founder Card styles */
+        .founder-card {
+            margin-top: -100px;
             background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-radius: 20px;
-            position: relative;
-            width: calc(50% - 50px);
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .timeline-content h4 {
-            font-family: 'Dancing Script', cursive;
-            font-size: 2.5rem;
-            color: #ff6b6b;
-            margin-bottom: 15px;
-        }
-
-        .timeline-content p {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.3rem;
-            line-height: 1.6;
-            color: #666;
-        }
-
-        .timeline-item:nth-child(odd) .timeline-content {
-            float: left;
-            transform: translateX(-20px);
-        }
-
-        .timeline-item:nth-child(even) .timeline-content {
-            float: right;
-            transform: translateX(20px);
-        }
-
-        .timeline-content::after {
-            content: '';
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            background: #ff6b6b;
-            border: 4px solid #fff;
-            border-radius: 50%;
-            top: 30px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-
-        .timeline-item:nth-child(odd) .timeline-content::after {
-            right: -62px;
-        }
-
-        .timeline-item:nth-child(even) .timeline-content::after {
-            left: -62px;
-        }
-
-        .timeline-item:hover .timeline-content::after {
-            transform: scale(1.2);
-            background: #ffa502;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .team-member {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .team-member img {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            object-fit: cover;
-            border: 5px solid #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .stats-box {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .stats-box i {
-            font-size: 40px;
-            color: #ff6b6b;
-            margin-bottom: 15px;
-        }
-
-        .stats-box h3 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #2d3436;
-        }
-
-        @media (max-width: 768px) {
-            .timeline::before {
-                left: 31px;
-            }
-
-            .timeline-content {
-                width: calc(100% - 90px);
-                float: right !important;
-            }
-
-            .timeline-content::after {
-                left: -50px !important;
-            }
-        }
-
-        /* Add new styles */
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            padding: 2rem 0;
-        }
-
-        .team-card {
-            background: white;
-            border-radius: 15px;
+            border-radius: 30px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
         }
 
-        .team-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .team-image {
+        .founder-image {
             width: 100%;
-            height: 300px;
+            height: 600px;
             object-fit: cover;
+            transition: transform 0.5s ease;
         }
 
-        .team-info {
-            padding: 1.5rem;
+        .founder-card:hover {
+            transform: translateY(-20px) rotateX(5deg);
+            box-shadow: 0 40px 60px rgba(255,71,87,0.2);
+        }
+
+        .founder-card:hover .founder-image {
+            transform: scale(1.05);
+        }
+
+        .founder-info {
+            padding: 40px;
             text-align: center;
+            background: linear-gradient(to top, white, rgba(255,255,255,0.9));
+            position: relative;
         }
 
-        .social-links {
+        .founder-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            color: #ff4757;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .founder-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #ff4757, transparent);
+            transform: scaleX(0);
+            transition: transform 0.5s ease;
+        }
+
+        .founder-card:hover .founder-title::after {
+            transform: scaleX(1);
+        }
+
+        .founder-quote {
+            font-size: 1.2rem;
+            color: #666;
+            font-style: italic;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .founder-social {
+            margin-top: 30px;
             display: flex;
             justify-content: center;
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: 20px;
         }
 
-        .social-links a {
-            width: 40px;
-            height: 40px;
+        .founder-social a {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background: #f8f9fa;
+            background: linear-gradient(45deg, #ff4757, #ff6b6b);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ff6b6b;
+            font-size: 1.5rem;
             transition: all 0.3s ease;
+            transform: translateY(30px);
+            opacity: 0;
         }
 
-        .social-links a:hover {
-            background: #ff6b6b;
-            color: white;
-            transform: translateY(-3px);
+        .founder-card:hover .founder-social a {
+            transform: translateY(0);
+            opacity: 1;
         }
 
-        /* Add cursive font */
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+        .founder-social a:nth-child(1) { transition-delay: 0.1s; }
+        .founder-social a:nth-child(2) { transition-delay: 0.2s; }
+        .founder-social a:nth-child(3) { transition-delay: 0.3s; }
 
-        .cursive-text {
-            font-family: 'Dancing Script', cursive;
+        .founder-social a:hover {
+            transform: translateY(-5px) scale(1.1);
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            box-shadow: 0 5px 15px rgba(255,71,87,0.4);
         }
 
-        /* Update team section styles */
-        .team-section {
-            padding: 60px 0;
-            background: #f8f9fa;
-        }
-
-        .team-card {
+        .stats-container {
+            padding: 80px 0;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-            margin-bottom: 30px;
-            overflow: hidden;
         }
 
-        .team-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .team-image {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-        }
-
-        .team-info {
-            padding: 20px;
+        .stat-card {
             text-align: center;
-        }
-
-        .team-info h4 {
-            color: #2d3436;
-            margin-bottom: 5px;
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.8rem;
-        }
-
-        .team-info p {
-            color: #636e72;
-            margin-bottom: 15px;
-        }
-
-        .team-social a {
-            color: #ff6b6b;
-            margin: 0 10px;
-            font-size: 1.2rem;
+            padding: 40px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
 
-        .team-social a:hover {
-            color: #ff5252;
-            transform: translateY(-3px);
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255,71,87,0.2);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            color: #ff4757;
+            margin-bottom: 20px;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2d3436;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .stat-label {
+            font-size: 1.2rem;
+            color: #636e72;
+            margin-top: 10px;
         }
     </style>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-shop me-2"></i>Surties
+            <a class="navbar-brand logo-container" href="/">
+                <!-- Replace SVG with logo image -->
+                <div class="logo-icon">
+                    <img src="/img/logo.png" alt="Surties Logo" style="width: 60px; height: 60px; object-fit: contain;">
+                </div>
+                <div class="logo-text">
+                    <span class="brand-name">Surties</span>
+                    <span class="brand-slogan">sweetshop</span>
+                </div>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -308,6 +307,28 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" role="button">
+                            Products <i class="bi bi-chevron-down ms-1 small"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#products" data-category="all">
+                                <i class="bi bi-circle-fill me-2 small"></i>All Products</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#products" data-category="Chocolates">
+                                <i class="bi bi-circle-fill me-2 small"></i>Chocolates</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#products" data-category="Namkeen">
+                                <i class="bi bi-circle-fill me-2 small"></i>Namkeen</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#products" data-category="Festival Sweets">
+                                <i class="bi bi-circle-fill me-2 small"></i>Festival Sweets</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#products" data-category="Cookies">
+                                <i class="bi bi-circle-fill me-2 small"></i>Cookies</a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#trackOrderModal">
@@ -341,7 +362,13 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link cart-icon" href="#" onclick="showCart()">
+                        <a class="nav-link favorites-icon" href="/favorites.html">
+                            <i class="bi bi-heart"></i>
+                            <span class="favorites-count" id="favoritesCount">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link cart-icon" href="/cart.html">
                             <i class="bi bi-cart3"></i>
                             <span class="cart-count" id="cartCount">0</span>
                         </a>
@@ -351,164 +378,75 @@
         </div>
     </nav>
 
-    <!-- Header with cursive -->
-    <header class="about-header text-center">
-        <div class="container position-relative">
-            <h1 class="display-4 mb-4 cursive-text">Our Sweet Journey</h1>
-            <p class="lead cursive-text">Crafting moments of joy since 1990</p>
+    <!-- Updated About Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <div class="about-hero-content text-center">
+                <h1>Our Sweet Legacy</h1>
+                <p>Bringing authentic Indian sweets to your doorstep since 1990. 
+                   Every sweet we make carries the warmth of tradition and the touch of excellence.</p>
+            </div>
         </div>
-    </header>
+    </section>
+
+    <!-- Updated Founder Section with new image path -->
+    <section class="founder-section pb-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="founder-card">
+                        <img src="/img/abhi.jpg" alt="Abhijeet Savaliya" class="founder-image">
+                        <div class="founder-info">
+                            <h2 class="founder-title">Abhijeet Savaliya</h2>
+                            <p class="text-muted mb-3">Founder & Chairman</p>
+                            <p class="founder-quote">
+                                "Our journey began with a simple dream - to bring the authentic taste of 
+                                traditional Indian sweets to every home. Today, that dream has blossomed 
+                                into a legacy of quality, trust, and sweetness that brings smiles to 
+                                thousands of faces every day."
+                            </p>
+                            <div class="founder-social">
+                                <a href="#"><i class="bi bi-linkedin"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
+                                <a href="#"><i class="bi bi-twitter"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Stats Section -->
-    <section class="py-5">
+    <section class="stats-container">
         <div class="container">
-            <div class="row">
-                <div class="col-md-3 col-sm-6">
-                    <div class="stats-box">
-                        <i class="bi bi-shop"></i>
-                        <h3 class="cursive-text">30+</h3>
-                        <p class="cursive-text">Years of Excellence</p>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-shop stat-icon"></i>
+                        <div class="stat-number" data-target="30">0+</div>
+                        <div class="stat-label">Years of Excellence</div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="stats-box">
-                        <i class="bi bi-people"></i>
-                        <h3 class="cursive-text">50k+</</h3>
-                        <p class="cursive-text">Happy Customers</p>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-people stat-icon"></i>
+                        <div class="stat-number" data-target="50000">0+</div>
+                        <div class="stat-label">Happy Customers</div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="stats-box">
-                        <i class="bi bi-cake2"></i>
-                        <h3 class="cursive-text">100+</</h3>
-                        <p class="cursive-text">Sweet Varieties</p>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-basket2 stat-icon"></i>
+                        <div class="stat-number" data-target="100">0+</div>
+                        <div class="stat-label">Sweet Varieties</div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="stats-box">
-                        <i class="bi bi-gift"></i>
-                        <h3 class="cursive-text">1M+</</h3>
-                        <p class="cursive-text">Orders Delivered</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Improved Timeline -->
-    <section class="timeline py-5">
-        <div class="container">
-            <h2 class="text-center mb-5 cursive-text" style="font-size: 3.5rem;">Our Journey Through Time</h2>
-            <div class="timeline-items">
-                <div class="timeline-item clearfix">
-                    <div class="timeline-content">
-                        <h4>1990</h4>
-                        <p>A small sweet shop in Surat with big dreams, we started our journey with traditional Indian sweets made from cherished family recipes.</p>
-                    </div>
-                </div>
-                <div class="timeline-item clearfix">
-                    <div class="timeline-content">
-                        <h4>2000</h4>
-                        <p>Growing with Gujarat's love, we expanded to multiple locations while keeping our commitment to quality and tradition alive.</p>
-                    </div>
-                </div>
-                <div class="timeline-item clearfix">
-                    <div class="timeline-content">
-                        <h4>2010</h4>
-                        <p>Embracing innovation, we introduced fusion sweets blending Indian traditions with international flavors.</p>
-                    </div>
-                </div>
-                <div class="timeline-item clearfix">
-                    <div class="timeline-content">
-                        <h4>2020</h4>
-                        <p>Taking a digital leap, we brought our sweet delights to your doorstep with online ordering and delivery services.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Replace Team Section with this -->
-    <section class="team-section">
-        <div class="container">
-            <h2 class="text-center mb-5 cursive-text" style="font-size: 3.5rem;">Founders of surties</h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="team-card">
-                        <img src="https://img.freepik.com/free-photo/confident-business-man-portrait_144627-46797.jpg" alt="CEO" class="team-image">
-                        <div class="team-info">
-                            <h4>Drashti Adroja</h4>
-                            <p>CEO & Founder</p>
-                            <div class="team-social">
-                                <a href="#"><i class="bi bi-linkedin"></i></a>
-                                <a href="#"><i class="bi bi-twitter"></i></a>
-                                <a href="#"><i class="bi bi-instagram"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="team-card">
-                        <img src="https://img.freepik.com/free-photo/portrait-successful-man-having-stubble-posing-with-broad-smile-keeping-arms-folded_171337-1267.jpg" alt="Co-founder" class="team-image">
-                        <div class="team-info">
-                            <h4>Mihika padsala</h4>
-                            <p>Co-founder</p>
-                            <div class="team-social">
-                                <a href="#"><i class="bi bi-linkedin"></i></a>
-                                <a href="#"><i class="bi bi-twitter"></i></a>
-                                <a href="#"><i class="bi bi-instagram"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="team-card">
-                        <img src="https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg" alt="Manager" class="team-image">
-                        <div class="team-info">
-                            <h4>Khushi Vekariyal</h4>
-                            <p>Operations Manager</p>
-                            <div class="team-social">
-                                <a href="#"><i class="bi bi-linkedin"></i></a>
-                                <a href="#"><i class="bi bi-twitter"></i></a>
-                                <a href="#"><i class="bi bi-instagram"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Values Section -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="text-center mb-5">Our Values</h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="bi bi-heart-fill text-danger display-4 mb-3"></i>
-                            <h4>Quality</h4>
-                            <p>We use only the finest ingredients to create our sweets</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="bi bi-shield-check text-success display-4 mb-3"></i>
-                            <h4>Hygiene</h4>
-                            <p>Maintaining highest standards of cleanliness</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="bi bi-people-fill text-primary display-4 mb-3"></i>
-                            <h4>Customer First</h4>
-                            <p>Your satisfaction is our top priority</p>
-                        </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-gift stat-icon"></i>
+                        <div class="stat-number" data-target="1000000">0+</div>
+                        <div class="stat-label">Orders Delivered</div>
                     </div>
                 </div>
             </div>
@@ -533,47 +471,39 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCYpnxWzjIV-N6PnL-0hA_xlb4wcdQljw"></script>
-    <script type="module" src="/js/firebase-config.js"></script>
-    <script type="module" src="/js/auth.js"></script>
     <script>
-        // Check auth state on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            updateAuthUI();
-        });
-    </script>
-    <script type="module">
-        import { auth } from '/js/firebase-config.js';
-        
-        window.handleSignOut = async (e) => {
-            e.preventDefault();
-            try {
-                await auth.signOut();
-                localStorage.clear(); // Clear all local storage
-                window.location.href = '/auth.html'; // Redirect to auth page
-            } catch (error) {
-                console.error('Sign out error:', error);
-                alert('Error signing out. Please try again.');
-            }
-        };
+        // Animate numbers
+        function animateNumbers() {
+            const stats = document.querySelectorAll('.stat-number');
+            
+            stats.forEach(stat => {
+                const target = parseInt(stat.getAttribute('data-target'));
+                const duration = 2000; // 2 seconds
+                const increment = target / (duration / 16); // 60fps
+                let current = 0;
 
-        // Update auth UI on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            const userData = localStorage.getItem('user');
-            const loginButton = document.getElementById('loginButton');
-            const userDropdown = document.getElementById('userDropdown');
-            const userDisplayName = document.getElementById('userDisplayName');
+                const updateNumber = () => {
+                    current += increment;
+                    if (current < target) {
+                        stat.textContent = Math.floor(current).toLocaleString() + '+';
+                        requestAnimationFrame(updateNumber);
+                    } else {
+                        stat.textContent = target.toLocaleString() + '+';
+                    }
+                };
 
-            if (userData) {
-                loginButton.classList.add('d-none');
-                userDropdown.classList.remove('d-none');
-                const user = JSON.parse(userData);
-                userDisplayName.textContent = user.displayName || user.email;
-            } else {
-                loginButton.classList.remove('d-none');
-                userDropdown.classList.add('d-none');
-            }
-        });
+                const observer = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting) {
+                        updateNumber();
+                        observer.disconnect();
+                    }
+                });
+
+                observer.observe(stat);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', animateNumbers);
     </script>
 </body>
 </html>

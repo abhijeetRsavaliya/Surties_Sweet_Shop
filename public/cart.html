@@ -7,6 +7,46 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
+        /* Add these new logo styles at the top of your existing styles */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0;
+        }
+
+        .logo-icon {
+            width: 60px !important;
+            height: 60px !important;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .brand-name {
+            font-size: 32px !important;
+            font-weight: 700;
+            color: #ff4757;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .brand-slogan {
+            font-size: 14px !important;
+            color: #2f3542;
+            font-family: 'Dancing Script', cursive;
+            margin-top: -5px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
         .cart-item-image {
             width: 120px;
             height: 120px;
@@ -155,7 +195,19 @@
 
     <!-- Import your existing navbar here -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-        <!-- ...existing navbar code... -->
+        <div class="container">
+            <a class="navbar-brand logo-container" href="/">
+                <!-- Replace SVG with logo image -->
+                <div class="logo-icon">
+                    <img src="/img/logo.png" alt="Surties Logo" style="width: 40px; height: 40px; object-fit: contain;">
+                </div>
+                <div class="logo-text">
+                    <span class="brand-name">Surties</span>
+                    <span class="brand-slogan">sweetshop</span>
+                </div>
+            </a>
+            // ...existing navbar code...
+        </div>
     </nav>
 
     <div class="container my-5">
