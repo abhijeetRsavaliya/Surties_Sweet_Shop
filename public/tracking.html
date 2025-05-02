@@ -34,20 +34,131 @@
             100% { opacity: 0.1; }
         }
 
-        .tracking-form {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-            margin-top: -100px;
+        /* Logo Styles */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             position: relative;
-            transform: translateY(0);
+        }
+
+        .logo-icon {
+            position: relative;
+            width: 60px !important;
+            height: 60px !important;
+            transform-style: preserve-3d;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 32px !important;
+            font-weight: 700;
+            color: #ff4757;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .brand-slogan {
+            font-size: 14px !important;
+            color: #2f3542;
+            font-family: 'Dancing Script', cursive;
+            margin-top: -5px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateY(0); }
+            50% { transform: translateY(-5px) rotateY(180deg); }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 5px rgba(255, 71, 87, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                text-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+                transform: scale(1.05);
+            }
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.success {
+            background: #28a745;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+        }
+
+        .notification.error {
+            background: #ff4757;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .tracking-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tracking-form input {
+            height: 50px;
+            font-size: 1.1rem;
+            border: 2px solid #eee;
             transition: all 0.3s ease;
         }
 
-        .tracking-form:hover {
-            transform: translateY(-5px);
+        .tracking-form input:focus {
+            border-color: #ff4757;
+            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1);
+        }
+
+        .tracking-btn {
+            height: 50px;
+            background: #ff4757;
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tracking-btn:hover {
+            background: #ff2e44;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
         }
 
         .timeline-container {
@@ -128,7 +239,6 @@
             width: 100%;
         }
 
-        /* Add loading overlay */
         .map-overlay {
             position: absolute;
             top: 0;
@@ -192,7 +302,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Add Toast Notification Styles */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -235,8 +344,14 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-shop me-2"></i>Surties
+            <a class="navbar-brand logo-container" href="/">
+                <div class="logo-icon">
+                    <img src="/img/logo.png" alt="Surties Logo">
+                </div>
+                <div class="logo-text">
+                    <span class="brand-name">Surties</span>
+                    <span class="brand-slogan">sweetshop</span>
+                </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -260,26 +375,20 @@
     <!-- Header -->
     <header class="tracking-header">
         <div class="container">
-            <h1 class="text-center mb-4">Track Your Order</h1>
             <div class="row justify-content-center">
                 <div class="col-md-6">
-                    <div class="tracking-form animate__animated animate__fadeInUp">
-                        <h4 class="mb-4">Enter Your Order Details</h4>
-                        <form id="trackingForm" onsubmit="trackOrderById(event)">
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white">
-                                        <i class="bi bi-receipt text-primary"></i>
-                                    </span>
-                                    <input type="text" 
-                                           class="form-control form-control-lg" 
-                                           id="trackingPaymentId"
-                                           placeholder="Enter your payment ID"
-                                           required>
-                                    <button type="submit" class="btn btn-primary px-4">
-                                        <i class="bi bi-search me-2"></i>Track
-                                    </button>
-                                </div>
+                    <div class="tracking-form">
+                        <h4 class="text-center mb-4">Track Your Order</h4>
+                        <form id="trackingForm" onsubmit="trackOrder(event)">
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="trackingId"
+                                       placeholder="Enter your order/payment ID"
+                                       required>
+                                <button class="btn tracking-btn" type="submit">
+                                    <i class="bi bi-search me-2"></i>Track
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -299,17 +408,17 @@
             <div class="timeline-container">
                 <div class="timeline">
                     <div class="timeline-progress" id="timelineProgress"></div>
-                    <div class="point" data-status="confirmed" style="left: 0%;">
-                        <div class="point-label">Confirmed</div>
-                        <small id="confirmedTime">--:--</small>
+                    <div class="point" data-status="pending" style="left: 0%;">
+                        <div class="point-label">Order Confirmed</div>
+                        <small id="pendingTime">--:--</small>
                     </div>
-                    <div class="point" data-status="preparing" style="left: 33%;">
+                    <div class="point" data-status="processing" style="left: 33%;">
                         <div class="point-label">Processing</div>
-                        <small id="preparingTime">--:--</small>
+                        <small id="processingTime">--:--</small>
                     </div>
-                    <div class="point" data-status="dispatched" style="left: 66%;">
-                        <div class="point-label">Out for Delivery</div>
-                        <small id="dispatchedTime">--:--</small>
+                    <div class="point" data-status="shipped" style="left: 66%;">
+                        <div class="point-label">Shipped</div>
+                        <small id="shippedTime">--:--</small>
                     </div>
                     <div class="point" data-status="delivered" style="left: 100%;">
                         <div class="point-label">Delivered</div>
@@ -343,6 +452,9 @@
     <!-- Add Toast Container -->
     <div class="toast-container"></div>
 
+    <!-- Update notification div to be more visible -->
+    <div class="notification" id="notification" role="alert"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const SHOP_LOCATION = {
@@ -351,9 +463,12 @@
             address: "7,8,9, Dharmanandan Complex, Savaliya Circle, Yoginagar Society, Punagam, Surat, Gujarat 395010"
         };
 
+        let ws;
+        const orderStatuses = ['pending', 'processing', 'shipped', 'delivered'];
+        let currentOrderId;
+
         // Initialize map function
-        function initMap() {
-            // First create map centered on shop
+        function initMap(deliveryLocation) {
             const map = new google.maps.Map(document.getElementById('orderMap'), {
                 zoom: 15,
                 center: SHOP_LOCATION,
@@ -362,7 +477,6 @@
                 streetViewControl: false
             });
 
-            // Add shop marker
             const shopMarker = new google.maps.Marker({
                 position: SHOP_LOCATION,
                 map: map,
@@ -373,7 +487,6 @@
                 }
             });
 
-            // Add shop info window
             const shopInfo = new google.maps.InfoWindow({
                 content: `
                     <div style="padding: 10px;">
@@ -386,68 +499,157 @@
                 shopInfo.open(map, shopMarker);
             });
 
-            // Get user's current location
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const userLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-
-                        // Add user marker
-                        const userMarker = new google.maps.Marker({
-                            position: userLocation,
-                            map: map,
-                            title: 'Your Location',
-                            icon: {
-                                url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                                scaledSize: new google.maps.Size(40, 40)
-                            },
-                            animation: google.maps.Animation.DROP
-                        });
-
-                        // Draw route between user and shop
-                        const directionsService = new google.maps.DirectionsService();
-                        const directionsRenderer = new google.maps.DirectionsRenderer({
-                            map: map,
-                            suppressMarkers: true // We'll use our custom markers
-                        });
-
-                        directionsService.route({
-                            origin: userLocation,
-                            destination: SHOP_LOCATION,
-                            travelMode: google.maps.TravelMode.DRIVING
-                        }, (response, status) => {
-                            if (status === 'OK') {
-                                directionsRenderer.setDirections(response);
-                                const route = response.routes[0].legs[0];
-                                
-                                // Update distance and time
-                                document.getElementById('orderDistance').textContent = route.distance.text;
-                                document.getElementById('estimatedTime').textContent = route.duration.text;
-
-                                // Fit map to show entire route
-                                const bounds = new google.maps.LatLngBounds();
-                                bounds.extend(userLocation);
-                                bounds.extend(SHOP_LOCATION);
-                                map.fitBounds(bounds);
-
-                                // Hide loading overlay
-                                document.getElementById('mapOverlay').style.display = 'none';
-                            }
-                        });
+            if (deliveryLocation) {
+                const userMarker = new google.maps.Marker({
+                    position: deliveryLocation,
+                    map: map,
+                    title: 'Delivery Location',
+                    icon: {
+                        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                        scaledSize: new google.maps.Size(40, 40)
                     },
-                    (error) => {
-                        console.error('Error getting location:', error);
+                    animation: google.maps.Animation.DROP
+                });
+
+                const directionsService = new google.maps.DirectionsService();
+                const directionsRenderer = new google.maps.DirectionsRenderer({
+                    map: map,
+                    suppressMarkers: true
+                });
+
+                directionsService.route({
+                    origin: SHOP_LOCATION,
+                    destination: deliveryLocation,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }, (response, status) => {
+                    if (status === 'OK') {
+                        directionsRenderer.setDirections(response);
+                        const route = response.routes[0].legs[0];
+                        
+                        document.getElementById('orderDistance').textContent = route.distance.text;
+                        document.getElementById('estimatedTime').textContent = route.duration.text;
+
+                        const bounds = new google.maps.LatLngBounds();
+                        bounds.extend(SHOP_LOCATION);
+                        bounds.extend(deliveryLocation);
+                        map.fitBounds(bounds);
+
                         document.getElementById('mapOverlay').style.display = 'none';
-                        alert('Unable to get your location. Please enable location services.');
                     }
-                );
+                });
             } else {
                 document.getElementById('mapOverlay').style.display = 'none';
-                alert('Geolocation is not supported by your browser');
+                alert('Delivery location not available.');
             }
+        }
+
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:8080');
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'ORDER_STATUS_UPDATE' && 
+                    data.orderId === currentOrderId) {
+                    updateOrderStatus(data);
+                }
+            };
+
+            ws.onclose = () => {
+                // Reconnect if connection is lost
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        function updateOrderStatus(data) {
+            const statusIndex = orderStatuses.indexOf(data.status);
+            
+            // Update timeline progress
+            const progressBar = document.querySelector('.timeline-progress');
+            progressBar.style.width = `${(statusIndex / (orderStatuses.length - 1)) * 100}%`;
+
+            // Update status points
+            orderStatuses.forEach((status, index) => {
+                const point = document.querySelector(`.point[data-status="${status}"]`);
+                const timeElement = document.getElementById(`${status}Time`);
+                
+                if (index <= statusIndex) {
+                    point.classList.add('active');
+                    timeElement.textContent = new Date(data.timestamp).toLocaleTimeString();
+                } else {
+                    point.classList.remove('active');
+                    timeElement.textContent = '--:--';
+                }
+            });
+
+            // Show status notification
+            const statusMessages = {
+                pending: 'Order confirmed! Payment received.',
+                processing: 'Your order is being prepared!',
+                shipped: 'Your order is out for delivery!',
+                delivered: 'Order delivered successfully!'
+            };
+
+            showNotification(statusMessages[data.status], 'success');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        async function trackOrder(event) {
+            event.preventDefault();
+            const trackingId = document.getElementById('trackingId').value;
+            const trackingContent = document.getElementById('trackingContent');
+            currentOrderId = trackingId;
+            connectWebSocket();
+
+            try {
+                const response = await fetch(`/api/orders?id=${trackingId}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    showNotification('Invalid tracking ID. Please check and try again.', 'error');
+                    trackingContent.style.display = 'none';
+                    return;
+                }
+
+                trackingContent.style.display = 'block';
+                updateTrackingDisplay(data.order);
+
+            } catch (error) {
+                console.error('Tracking error:', error);
+                showNotification('Error tracking order. Please try again.', 'error');
+            }
+        }
+
+        function updateTrackingDisplay(order) {
+            document.getElementById('trackingOrderId').textContent = order.orderId;
+            document.getElementById('orderDate').textContent = new Date(order.orderDate).toLocaleDateString();
+            updateTimeline(order.status);
+            initMap(order.deliveryLocation);
+        }
+
+        function updateTimeline(status) {
+            const points = document.querySelectorAll('.point');
+            let progressWidth = 0;
+
+            points.forEach((point, index) => {
+                if (point.dataset.status === status) {
+                    point.classList.add('active');
+                    progressWidth = (index / (points.length - 1)) * 100;
+                } else {
+                    point.classList.remove('active');
+                }
+            });
+
+            document.getElementById('timelineProgress').style.width = `${progressWidth}%`;
         }
     </script>
     <script async defer

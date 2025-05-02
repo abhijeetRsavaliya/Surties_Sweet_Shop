@@ -128,201 +128,6 @@ async function getUserLocation() {
 }
 
 async function initializeMap(container) {
-    try {
-        // Get user's current location
-        const userLocation = await getUserLocation();
-        
-        // Create map centered between shop and user
-        const bounds = new google.maps.LatLngBounds();
-        bounds.extend(SHOP_ADDRESS.coordinates);
-        bounds.extend(userLocation);
-
-        const map = new google.maps.Map(container, {
-            zoom: 12,
-            center: bounds.getCenter(),
-            mapTypeControl: false,
-            fullscreenControl: true,
-            streetViewControl: false
-        });
-
-        // Add shop marker
-        const shopMarker = new google.maps.Marker({
-            position: SHOP_ADDRESS.coordinates,
-            map: map,
-            title: 'Surties Sweet Shop',
-            icon: {
-                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                scaledSize: new google.maps.Size(40, 40)
-            },
-            animation: google.maps.Animation.DROP
-        });
-
-        // Add user location marker
-        const userMarker = new google.maps.Marker({
-            position: userLocation,
-            map: map,
-            title: 'Your Location',
-            icon: {
-                url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                scaledSize: new google.maps.Size(40, 40)
-            },
-            animation: google.maps.Animation.DROP
-        });
-
-        // Draw route
-        const directionsService = new google.maps.DirectionsService();
-        const directionsRenderer = new google.maps.DirectionsRenderer({
-            map: map,
-            suppressMarkers: true // Use our custom markers
-        });
-
-        const route = await directionsService.route({
-            origin: SHOP_ADDRESS.coordinates,
-            destination: userLocation,
-            travelMode: google.maps.TravelMode.DRIVING
-        });
-
-        directionsRenderer.setDirections(route);
-
-        // Update distance and time
-        const leg = route.routes[0].legs[0];
-        document.getElementById('orderDistance').textContent = leg.distance.text;
-        document.getElementById('estimatedTime').textContent = leg.duration.text;
-
-        // Fit map to show entire route
-        map.fitBounds(bounds);
-
-        // Hide loading overlay
-        document.getElementById('mapOverlay').style.display = 'none';
-
-        return map;
-    } catch (error) {
-        console.error('Map initialization error:', error);
-        showNotification('Error loading map. Please try again.', 'error');
-        throw error;
-    }
-}
-
-async function trackOrderById(event) {
-    event?.preventDefault();
-    showLoading();
-    
-    const input = document.getElementById('trackingPaymentId');
-    const paymentId = input.value.trim();
-
-    try {
-        const orderDetails = JSON.parse(localStorage.getItem(`order_${paymentId}`));
-        if (!orderDetails) {
-            throw new Error('Invalid payment ID. Please check and try again.');
-        }
-
-        showNotification('Order found! Loading tracking details...', 'success');
-        document.getElementById('trackingContent').style.display = 'block';
-
-        // Wait for map to be initialized
-        if (!window.googleMap) {
-            await new Promise(resolve => {
-                const checkMap = setInterval(() => {
-                    if (window.googleMap) {
-                        clearInterval(checkMap);
-                        resolve();
-                    }
-                }, 100);
-            });
-        }
-
-        const map = window.googleMap;
-        const shopLocation = { lat: 21.2192, lng: 72.8836 }; // Savaliya Circle coordinates
-
-        // Get delivery location from order details
-        const geocoder = new google.maps.Geocoder();
-        const fullAddress = `${orderDetails.address}, ${orderDetails.city}, ${orderDetails.state}`;
-        
-        geocoder.geocode({ address: fullAddress }, (results, status) => {
-            if (status === 'OK') {
-                const deliveryLocation = results[0].geometry.location;
-                
-                // Add delivery marker
-                const deliveryMarker = new google.maps.Marker({
-                    position: deliveryLocation,
-                    map: map,
-                    icon: {
-                        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                        scaledSize: new google.maps.Size(40, 40)
-                    },
-                    title: 'Delivery Location',
-                    animation: google.maps.Animation.DROP
-                });
-
-                // Draw route
-                const directionsService = new google.maps.DirectionsService();
-                const directionsRenderer = new google.maps.DirectionsRenderer({
-                    map: map,
-                    suppressMarkers: true,
-                    polylineOptions: {
-                        strokeColor: '#ff4757',
-                        strokeWeight: 5
-                    }
-                });
-
-                directionsService.route({
-                    origin: shopLocation,
-                    destination: deliveryLocation,
-                    travelMode: google.maps.TravelMode.DRIVING
-                }, (response, status) => {
-                    if (status === 'OK') {
-                        directionsRenderer.setDirections(response);
-                        const route = response.routes[0];
-                        document.getElementById('orderDistance').textContent = route.legs[0].distance.text;
-                        document.getElementById('estimatedTime').textContent = route.legs[0].duration.text;
-                        
-                        // Fit map to show entire route
-                        const bounds = new google.maps.LatLngBounds();
-                        bounds.extend(shopLocation);
-                        bounds.extend(deliveryLocation);
-                        map.fitBounds(bounds);
-                    }
-                });
-            }
-        });
-
-        // Update order info
-        document.getElementById('trackingOrderId').textContent = paymentId;
-        document.getElementById('orderDate').textContent = new Date(orderDetails.orderDate).toLocaleString();
-
-        // Update timeline
-        updateOrderTimeline(await getOrderStatus(paymentId));
-
-        // Add refund button
-        addRefundButton(paymentId);
-
-    } catch (error) {
-        console.error('Tracking error:', error);
-        showNotification(error.message, 'error');
-        document.getElementById('trackingContent').style.display = 'none';
-    } finally {
-        hideLoading();
-    }
-}
-
-// Add error display function
-function showError(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
-    errorDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    document.querySelector('.search-box').appendChild(errorDiv);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        errorDiv.remove();
-    }, 5000);
-}
-
-// Add new map initialization function
-async function initializeMap(container) {
     const map = new google.maps.Map(container, {
         zoom: 15,
         center: SHOP_ADDRESS.coordinates,
@@ -505,21 +310,133 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function showNotification(message, type) {
-    const toastContainer = document.querySelector('.toast-container');
-    const toast = document.createElement('div');
-    toast.className = `custom-toast toast-${type}`;
-    toast.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
-            <div>${message}</div>
-        </div>
-    `;
-    toastContainer.appendChild(toast);
+async function trackOrder(event) {
+    event.preventDefault();
+    const trackingId = document.getElementById('trackingId').value;
+    const trackingContent = document.getElementById('trackingContent');
+    const loadingState = document.getElementById('loadingState');
 
-    // Remove toast after 3 seconds
+    try {
+        loadingState.style.display = 'block';
+        trackingContent.style.display = 'none';
+
+        const response = await fetch(`/api/orders/${trackingId}`);
+        const data = await response.json();
+
+        if (!data.success) {
+            showNotification('Your payment ID is incorrect', 'error');
+            loadingState.style.display = 'none';
+            trackingContent.style.display = 'none';
+            return;
+        }
+
+        // Show success notification
+        showNotification('Your payment ID is correct', 'success');
+
+        // Show tracking details
+        trackingContent.style.display = 'block';
+        updateOrderStatus(data.order);
+
+    } catch (error) {
+        console.error('Tracking error:', error);
+        showNotification('Error tracking order. Please try again.', 'error');
+    } finally {
+        loadingState.style.display = 'none';
+    }
+}
+
+function showNotification(message, type) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.classList.add('show');
+
+    // Remove notification after 3 seconds
     setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
+        notification.classList.remove('show');
     }, 3000);
+}
+
+// Add order status tracking notifications
+async function trackOrder(event) {
+    event.preventDefault();
+    const trackingId = document.getElementById('trackingId').value;
+    const trackingContent = document.getElementById('trackingContent');
+    const loadingState = document.getElementById('loadingState');
+
+    try {
+        loadingState.style.display = 'block';
+        trackingContent.style.display = 'none';
+
+        const response = await fetch(`/api/orders/${trackingId}`);
+        const data = await response.json();
+
+        if (!data.success) {
+            showNotification('Invalid tracking ID. Please check and try again.', 'error');
+            return;
+        }
+
+        // Show tracking content
+        trackingContent.style.display = 'block';
+
+        // Update order details
+        document.getElementById('trackingOrderId').textContent = data.order.orderId;
+        document.getElementById('orderDate').textContent = new Date(data.order.orderDate).toLocaleDateString();
+
+        // Update timeline based on status
+        const statuses = ['pending', 'processing', 'shipped', 'delivered'];
+        const currentIndex = statuses.indexOf(data.order.status);
+
+        // Update progress bar
+        const progress = (currentIndex / (statuses.length - 1)) * 100;
+        document.getElementById('timelineProgress').style.width = `${progress}%`;
+
+        // Update points
+        statuses.forEach((status, index) => {
+            const point = document.querySelector(`.point[data-status="${status}"]`);
+            const timeElement = document.getElementById(`${status}Time`);
+
+            if (index <= currentIndex) {
+                point.classList.add('active');
+                // Show time for completed statuses
+                timeElement.textContent = new Date().toLocaleTimeString();
+            } else {
+                point.classList.remove('active');
+                timeElement.textContent = '--:--';
+            }
+        });
+
+        // Show status notification
+        const statusMessages = {
+            'pending': 'Order confirmed and payment received!',
+            'processing': 'Your order is being processed',
+            'shipped': 'Your order is out for delivery',
+            'delivered': 'Order has been delivered'
+        };
+
+        showNotification(statusMessages[data.order.status], 'success');
+
+        // Initialize map with delivery location if available
+        if (data.order.deliveryLocation) {
+            initMap(data.order.deliveryLocation);
+        }
+
+    } catch (error) {
+        console.error('Tracking error:', error);
+        showNotification('Error tracking order. Please try again.', 'error');
+    } finally {
+        loadingState.style.display = 'none';
+    }
+}
+
+// Add this to update timeline in real-time
+let ws;
+function connectWebSocket(orderId) {
+    ws = new WebSocket('ws://localhost:8080');
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'ORDER_STATUS_UPDATE' && data.orderId === orderId) {
+            updateOrderStatus(data);
+        }
+    };
 }

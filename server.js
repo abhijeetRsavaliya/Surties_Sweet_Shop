@@ -10,8 +10,10 @@ const Advertisement = require('./models/Advertisement');
 const session = require('express-session');
 const { sendHelpRequestEmail } = require('./services/mailService');
 const fsPromises = require('fs').promises;
+const WebSocket = require('ws');
 
 const app = express();
+const wss = new WebSocket.Server({ port: 8080 });
 
 // Update the server startup code
 const startServer = async (retries = 0) => {
@@ -311,13 +313,30 @@ app.get('/api/orders', async (req, res) => {
     }
 });
 
+// Update order status endpoint with WebSocket notification
 app.put('/api/orders/:id/status', async (req, res) => {
     try {
         const order = await Order.findByIdAndUpdate(
             req.params.id,
-            { status: req.body.status },
+            { 
+                status: req.body.status,
+                [`${req.body.status}Time`]: new Date() // Store timestamp for each status
+            },
             { new: true }
         );
+
+        // Send real-time update to connected clients
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({
+                    type: 'ORDER_STATUS_UPDATE',
+                    orderId: order.orderId,
+                    status: order.status,
+                    timestamp: new Date()
+                }));
+            }
+        });
+
         res.json({ success: true, data: order });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -330,6 +349,48 @@ app.delete('/api/orders/:id', async (req, res) => {
         res.json({ success: true, message: 'Order deleted successfully' });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Add order tracking endpoint
+app.get('/api/orders/:id', async (req, res) => {
+    try {
+        const order = await Order.findOne({
+            $or: [
+                { orderId: req.params.id },
+                { paymentId: req.params.id }
+            ]
+        });
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                error: 'Order not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            order: {
+                orderId: order.orderId,
+                orderDate: order.orderDate,
+                status: order.status,
+                deliveryLocation: order.customerDetails.address,
+                statusTimestamps: {
+                    pending: order.pendingTime,
+                    processing: order.processingTime,
+                    shipped: order.shippedTime,
+                    delivered: order.deliveredTime
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching order:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch order details'
+        });
     }
 });
 

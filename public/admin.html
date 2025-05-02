@@ -194,6 +194,59 @@
             document.body.appendChild(alertDiv);
             setTimeout(() => alertDiv.remove(), 3000);
         }
+
+        function updateOrderStatus(orderId, status) {
+            fetch(`/api/orders/${orderId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(`Order status updated to ${status}`, 'success');
+                } else {
+                    throw new Error(data.error);
+                }
+            })
+            .catch(error => {
+                showNotification('Failed to update order status', 'error');
+                console.error(error);
+            });
+        }
+
+        // Update order list template to include status buttons
+        function renderOrder(order) {
+            return `
+                <div class="order-card">
+                    // ...existing order display code...
+                    <div class="status-buttons mt-3">
+                        <button class="btn btn-sm ${order.status === 'pending' ? 'btn-primary' : 'btn-outline-primary'}"
+                                onclick="updateOrderStatus('${order._id}', 'pending')"
+                                ${order.status === 'pending' ? 'disabled' : ''}>
+                            Pending
+                        </button>
+                        <button class="btn btn-sm ${order.status === 'processing' ? 'btn-primary' : 'btn-outline-primary'}"
+                                onclick="updateOrderStatus('${order._id}', 'processing')"
+                                ${order.status === 'processing' ? 'disabled' : ''}>
+                            Processing
+                        </button>
+                        <button class="btn btn-sm ${order.status === 'shipped' ? 'btn-primary' : 'btn-outline-primary'}"
+                                onclick="updateOrderStatus('${order._id}', 'shipped')"
+                                ${order.status === 'shipped' ? 'disabled' : ''}>
+                            Shipped
+                        </button>
+                        <button class="btn btn-sm ${order.status === 'delivered' ? 'btn-primary' : 'btn-outline-primary'}"
+                                onclick="updateOrderStatus('${order._id}', 'delivered')"
+                                ${order.status === 'delivered' ? 'disabled' : ''}>
+                            Delivered
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
     </script>
 
     <div class="admin-container">
