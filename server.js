@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const connectDB = require('./config/db');
 const multer = require('multer');
@@ -11,9 +13,20 @@ const session = require('express-session');
 const { sendHelpRequestEmail } = require('./services/mailService');
 const fsPromises = require('fs').promises;
 const WebSocket = require('ws');
+const axios = require('axios');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const wss = new WebSocket.Server({ port: 8080 });
+
+// Configure nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'help.infosurties@gmail.com',
+        pass: 'dgqa uetp eflb smmn'
+    }
+});
 
 // Update the server startup code
 const startServer = async (retries = 0) => {
@@ -67,7 +80,37 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     next();
 });
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, 'public', 'uploads'));
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        if (extname && mimetype) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'));
+        }
+    }
+});
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
 app.use(express.static('public'));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 
@@ -89,32 +132,6 @@ app.get('/admin-auth-check', (req, res) => {
         res.json({ success: true });
     } else {
         res.status(401).json({ success: false });
-    }
-});
-
-// Configure multer for image upload
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        const dir = './public/uploads/';
-        // Create directory if it doesn't exist
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        cb(null, dir);
-    },
-    filename: function(req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
-    fileFilter: function(req, file, cb) {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Not an image! Please upload an image.'));
-        }
     }
 });
 
@@ -313,33 +330,63 @@ app.get('/api/orders', async (req, res) => {
     }
 });
 
-// Update order status endpoint with WebSocket notification
-app.put('/api/orders/:id/status', async (req, res) => {
+// Update order status endpoint with email notification
+app.put('/api/orders/:orderId/status', async (req, res) => {
     try {
-        const order = await Order.findByIdAndUpdate(
-            req.params.id,
-            { 
-                status: req.body.status,
-                [`${req.body.status}Time`]: new Date() // Store timestamp for each status
-            },
-            { new: true }
-        );
+        const { orderId } = req.params;
+        const { status } = req.body;
+        
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, error: 'Order not found' });
+        }
 
-        // Send real-time update to connected clients
-        wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({
-                    type: 'ORDER_STATUS_UPDATE',
-                    orderId: order.orderId,
-                    status: order.status,
-                    timestamp: new Date()
-                }));
+        order.status = status;
+        await order.save();
+
+        // Send email notification
+        if (order.customerDetails?.email) {
+            let emailSubject = 'Order Status Update - Surties Sweet Shop';
+            let emailText = '';
+
+            switch (status) {
+                case 'processing':
+                    emailText = 'Your order is in process, HAPPY CUSTOMER BY SURTIES SWEET.';
+                    break;
+                case 'shipped':
+                    emailText = 'Your order has been shipped, HAPPY CUSTOMER BY SURTIES SWEET.';
+                    break;
+                case 'delivered':
+                    emailText = 'Your order has been delivered, HAPPY CUSTOMER BY SURTIES SWEET.';
+                    break;
             }
-        });
 
-        res.json({ success: true, data: order });
+            if (emailText) {
+                await transporter.sendMail({
+                    from: 'help.infosurties@gmail.com',
+                    to: order.customerDetails.email,
+                    subject: emailSubject,
+                    text: emailText,
+                    html: `
+                        <div style="padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
+                            <h2 style="color: #ff4757;">Surties Sweet Shop</h2>
+                            <p style="font-size: 16px; color: #2d3436;">${emailText}</p>
+                            <p style="margin-top: 20px;">Order ID: ${order.orderId}</p>
+                            <hr style="border-color: #dfe6e9;">
+                            <p style="font-size: 14px; color: #636e72;">Thank you for shopping with us!</p>
+                        </div>
+                    `
+                });
+            }
+        }
+
+        res.json({ 
+            success: true, 
+            message: 'Order status updated successfully'
+        });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Error updating order status:', error);
+        res.status(500).json({ success: false, error: 'Failed to update order status' });
     }
 });
 
@@ -352,13 +399,20 @@ app.delete('/api/orders/:id', async (req, res) => {
     }
 });
 
-// Add order tracking endpoint
+// Update order tracking endpoint
 app.get('/api/orders/:id', async (req, res) => {
     try {
+        const trackingId = req.params.id;
+        
+        // Get current date and 7 days ago date
+        const currentDate = new Date();
+        const sevenDaysAgo = new Date(currentDate.getTime() - (7 * 24 * 60 * 60 * 1000));
+
+        // Find order by either order ID or payment ID
         const order = await Order.findOne({
             $or: [
-                { orderId: req.params.id },
-                { paymentId: req.params.id }
+                { orderId: trackingId },
+                { paymentId: trackingId }
             ]
         });
 
@@ -369,19 +423,23 @@ app.get('/api/orders/:id', async (req, res) => {
             });
         }
 
+        // Check if order is within 7 days
+        if (order.orderDate < sevenDaysAgo) {
+            return res.status(400).json({
+                success: false,
+                error: 'Tracking expired'
+            });
+        }
+
         res.json({
             success: true,
             order: {
                 orderId: order.orderId,
+                paymentId: order.paymentId,
                 orderDate: order.orderDate,
-                status: order.status,
-                deliveryLocation: order.customerDetails.address,
-                statusTimestamps: {
-                    pending: order.pendingTime,
-                    processing: order.processingTime,
-                    shipped: order.shippedTime,
-                    delivered: order.deliveredTime
-                }
+                status: order.status || 'pending',
+                paymentMethod: order.paymentMethod,
+                validUntil: new Date(order.orderDate.getTime() + (7 * 24 * 60 * 60 * 1000))
             }
         });
 
@@ -672,13 +730,18 @@ app.post('/api/refund/:orderId', async (req, res) => {
 // Update advertisement routes with better error handling
 app.get('/api/advertisements', async (req, res) => {
     try {
-        console.log('Fetching advertisements...');
-        const ads = await Advertisement.find({ isActive: true });
-        console.log('Found advertisements:', ads);
-        res.json({
-            success: true,
-            data: ads
+        const now = new Date();
+        
+        // Find and delete expired advertisements
+        await Advertisement.deleteMany({ validUntil: { $lt: now } });
+
+        // Get remaining active advertisements
+        const advertisements = await Advertisement.find({ 
+            validUntil: { $gte: now },
+            isActive: true 
         });
+
+        res.json({ success: true, data: advertisements });
     } catch (error) {
         console.error('Error fetching advertisements:', error);
         res.status(500).json({
@@ -690,48 +753,24 @@ app.get('/api/advertisements', async (req, res) => {
 
 app.post('/api/advertisements', upload.single('image'), async (req, res) => {
     try {
-        console.log('Received advertisement request:', req.body); // Debug log
-        
         if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                error: 'Image is required'
-            });
+            return res.status(400).json({ success: false, error: 'Image is required' });
         }
 
-        const { title, description, originalPrice, offerPrice, validUntil } = req.body;
-
-        // Validate required fields
-        if (!title || !description || !originalPrice || !offerPrice || !validUntil) {
-            return res.status(400).json({
-                success: false,
-                error: 'All fields are required'
-            });
-        }
-
-        const newAd = new Advertisement({
-            title,
-            description,
-            image: `/uploads/${req.file.filename}`,
-            originalPrice: parseFloat(originalPrice),
-            offerPrice: parseFloat(offerPrice),
-            validUntil: new Date(validUntil),
-            isActive: true
+        const advertisement = new Advertisement({
+            title: req.body.title,
+            description: req.body.description,
+            originalPrice: req.body.originalPrice,
+            offerPrice: req.body.offerPrice,
+            validUntil: req.body.validUntil,
+            image: req.file.filename // Save just the filename
         });
 
-        console.log('Creating new advertisement:', newAd); // Debug log
-
-        const savedAd = await newAd.save();
-        res.status(201).json({
-            success: true,
-            data: savedAd
-        });
+        await advertisement.save();
+        res.json({ success: true, data: advertisement });
     } catch (error) {
         console.error('Error creating advertisement:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to create advertisement: ' + error.message
-        });
+        res.status(500).json({ success: false, error: 'Failed to create advertisement' });
     }
 });
 

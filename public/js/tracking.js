@@ -310,39 +310,80 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Declare global variables
+let currentOrderId = null;
+let websocket = null;
+
 async function trackOrder(event) {
     event.preventDefault();
-    const trackingId = document.getElementById('trackingId').value;
+    
+    const trackingId = document.getElementById('trackingId').value.trim();
     const trackingContent = document.getElementById('trackingContent');
-    const loadingState = document.getElementById('loadingState');
+
+    if (!trackingId) {
+        showNotification('Please enter tracking ID', 'error');
+        return;
+    }
 
     try {
-        loadingState.style.display = 'block';
+        // Show loading state
         trackingContent.style.display = 'none';
 
         const response = await fetch(`/api/orders/${trackingId}`);
         const data = await response.json();
 
         if (!data.success) {
-            showNotification('Your payment ID is incorrect', 'error');
-            loadingState.style.display = 'none';
-            trackingContent.style.display = 'none';
+            showNotification('Order not found or tracking expired', 'error');
             return;
         }
 
-        // Show success notification
-        showNotification('Your payment ID is correct', 'success');
+        // Update currentOrderId
+        currentOrderId = data.order.orderId || data.order.paymentId;
 
-        // Show tracking details
+        // Show success message
+        showNotification(`Order found - ${data.order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}`, 'success');
+
+        // Update order details
+        document.getElementById('displayOrderId').textContent = currentOrderId;
+        document.getElementById('orderDate').textContent = new Date(data.order.orderDate).toLocaleDateString();
+        document.getElementById('paymentMethod').textContent = data.order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment';
+        document.getElementById('validUntil').textContent = new Date(data.order.validUntil).toLocaleDateString();
+
+        // Update timeline
+        updateTimeline(data.order.status);
+
+        // Show tracking content
         trackingContent.style.display = 'block';
-        updateOrderStatus(data.order);
+
+        // Connect to WebSocket
+        initWebSocket();
 
     } catch (error) {
         console.error('Tracking error:', error);
-        showNotification('Error tracking order. Please try again.', 'error');
-    } finally {
-        loadingState.style.display = 'none';
+        showNotification('Error fetching order details', 'error');
     }
+}
+
+function updateTimeline(status) {
+    const statuses = ['pending', 'processing', 'shipped', 'delivered'];
+    const currentIndex = statuses.indexOf(status);
+
+    // Update progress bar
+    const progress = (currentIndex / (statuses.length - 1)) * 100;
+    document.querySelector('.timeline-progress').style.height = `${progress}%`;
+
+    // Update timeline points
+    statuses.forEach((pointStatus, index) => {
+        const point = document.querySelector(`.timeline-item[data-status="${pointStatus}"]`);
+        if (index <= currentIndex) {
+            point.classList.add('active');
+            document.getElementById(`${pointStatus}Time`).textContent = 
+                new Date().toLocaleTimeString();
+        } else {
+            point.classList.remove('active');
+            document.getElementById(`${pointStatus}Time`).textContent = '--:--';
+        }
+    });
 }
 
 function showNotification(message, type) {
@@ -351,92 +392,69 @@ function showNotification(message, type) {
     notification.className = `notification ${type}`;
     notification.classList.add('show');
 
-    // Remove notification after 3 seconds
     setTimeout(() => {
         notification.classList.remove('show');
     }, 3000);
 }
 
-// Add order status tracking notifications
-async function trackOrder(event) {
-    event.preventDefault();
-    const trackingId = document.getElementById('trackingId').value;
-    const trackingContent = document.getElementById('trackingContent');
-    const loadingState = document.getElementById('loadingState');
-
-    try {
-        loadingState.style.display = 'block';
-        trackingContent.style.display = 'none';
-
-        const response = await fetch(`/api/orders/${trackingId}`);
-        const data = await response.json();
-
-        if (!data.success) {
-            showNotification('Invalid tracking ID. Please check and try again.', 'error');
-            return;
-        }
-
-        // Show tracking content
-        trackingContent.style.display = 'block';
-
-        // Update order details
-        document.getElementById('trackingOrderId').textContent = data.order.orderId;
-        document.getElementById('orderDate').textContent = new Date(data.order.orderDate).toLocaleDateString();
-
-        // Update timeline based on status
-        const statuses = ['pending', 'processing', 'shipped', 'delivered'];
-        const currentIndex = statuses.indexOf(data.order.status);
-
-        // Update progress bar
-        const progress = (currentIndex / (statuses.length - 1)) * 100;
-        document.getElementById('timelineProgress').style.width = `${progress}%`;
-
-        // Update points
-        statuses.forEach((status, index) => {
-            const point = document.querySelector(`.point[data-status="${status}"]`);
-            const timeElement = document.getElementById(`${status}Time`);
-
-            if (index <= currentIndex) {
-                point.classList.add('active');
-                // Show time for completed statuses
-                timeElement.textContent = new Date().toLocaleTimeString();
-            } else {
-                point.classList.remove('active');
-                timeElement.textContent = '--:--';
-            }
-        });
-
-        // Show status notification
-        const statusMessages = {
-            'pending': 'Order confirmed and payment received!',
-            'processing': 'Your order is being processed',
-            'shipped': 'Your order is out for delivery',
-            'delivered': 'Order has been delivered'
-        };
-
-        showNotification(statusMessages[data.order.status], 'success');
-
-        // Initialize map with delivery location if available
-        if (data.order.deliveryLocation) {
-            initMap(data.order.deliveryLocation);
-        }
-
-    } catch (error) {
-        console.error('Tracking error:', error);
-        showNotification('Error tracking order. Please try again.', 'error');
-    } finally {
-        loadingState.style.display = 'none';
+function initWebSocket() {
+    if (websocket) {
+        websocket.close();
     }
-}
 
-// Add this to update timeline in real-time
-let ws;
-function connectWebSocket(orderId) {
-    ws = new WebSocket('ws://localhost:8080');
-    ws.onmessage = (event) => {
+    websocket = new WebSocket('ws://localhost:8080');
+
+    websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.type === 'ORDER_STATUS_UPDATE' && data.orderId === orderId) {
-            updateOrderStatus(data);
+        if (data.type === 'ORDER_STATUS_UPDATE' && data.orderId === currentOrderId) {
+            updateTimeline(data.status);
+            showNotification(`Order status updated to ${data.status}`, 'success');
         }
     };
+
+    websocket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+
+    websocket.onclose = () => {
+        setTimeout(initWebSocket, 3000); // Reconnect after 3 seconds
+    };
+}
+
+// Clean up WebSocket on page unload
+window.addEventListener('unload', () => {
+    if (websocket) {
+        websocket.close();
+    }
+});
+
+function connectWebSocket() {
+    ws = new WebSocket('ws://localhost:8080');
+    
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'ORDER_STATUS_UPDATE' && data.orderId === currentOrderId) {
+            updateTimeline(data.status);
+            showNotification(`Order status updated: ${data.status}`, 'success');
+        }
+    };
+
+    ws.onclose = () => {
+        setTimeout(connectWebSocket, 3000);
+    };
+}
+
+function initMap(deliveryLocation) {
+    if (!deliveryLocation) return;
+
+    const map = new google.maps.Map(document.getElementById('mapSection'), {
+        zoom: 15,
+        center: deliveryLocation
+    });
+
+    new google.maps.Marker({
+        position: deliveryLocation,
+        map: map,
+        title: 'Delivery Location'
+    });
 }
